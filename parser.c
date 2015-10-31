@@ -5,10 +5,14 @@
 #include "scaner.h"
 #include "parser.h"
 #include "define.h"
+#include "tabulka_symbolu.h"
+
+#define getToken if ((token = getNextToken(&attr)) == LEX_ERR){return LEX_ERR;}
 
 int token;
 int countVar = 0;
-struct symbol_table* table;
+struct symbol_table *table;
+struct symbol_table *glob_table;
 // ptrStack stack;
 string attr;
 string *params;
@@ -87,10 +91,7 @@ int program(){
 			{
 				return outcome;
 			}
-			if ((outcome = getNextToken(&attr) == LEX_ERR))
-			{
-				return LEX_ERR;
-			}
+			getToken
 			if (outcome != EOF)
 			{
 				return SYN_ERR;
@@ -143,14 +144,13 @@ int funkce(){
 			{
 				return outcome;
 			}
-			if ((outcome = getNextToken(&attr) == LEX_ERR))
-			{
-				return LEX_ERR;
-			}
+			getToken
 			switch(outcome){
 				case STREDNIK:
+					// vlozeni do glob_tabSym
 					return IS_OK;
 				case LS_ZAVORKA:
+					// vlozeni do glob_tabSym
 					outcome = slozeny();
 					if (outcome != IS_OK)
 					{
@@ -168,30 +168,169 @@ int funkce(){
 
 int funkcez(){
 	int outcome;
+	string copyatr;
 	switch(token){
 		//FUNKCEZ → PARAMETR lz PARAMETRY pz
-
+		case INT:
+			data->typ = INT_V;
+			break;
+		case DOUBLE:
+			data->typ = DOUBLE_V;
+			break;
+		case STRING:
+			data->typ = STRING_V;
+			break;
+		default:
+	}	
+	getToken
+	if (token != ID)
+	{
+		return SYN_ERR;
+	}else{
+		if((strCopyString(copyatr, attr) == STR_ERROR){
+			return INTERNAL_ERR;
+		}
+	}
+	getToken
+	if (token != L_ZAVORKA)
+	{
+		return SYN_ERR;
+	}
+	getToken
+	switch(token){
+		case INT:
+		case DOUBLE:
+		case STRING:
+		 	outcome = parametry();
+		 	if (outcome != IS_OK)
+		 	{
+		 		return outcome;
+		 	}
+		 	break;
+		case P_ZAVORKA:
+			return IS_OK;
+		default:
+			return SYN_ERR;
+			break;
 	}
 }
 
+int parametry(){
+	int outcome;
+	switch(token){
+		//PARAMETRY → PARAMETR DPARAMETR (parametry)
+		case INT:
+			// ulozeni hodnoty
+			break;
+		case DOUBLE:
+			// sameAs
+			break;
+		case STRING:
+			//sameAs
+			break;
+		default:
+			return SYN_ERR;
+			break;
+	}
+	getToken
+	if (token != ID)
+	{
+		return SYN_ERR;
+	} 
+	// ulozeni ID do tabsym
+	getToken 
+	switch(token){
+		case CARKA:
+			getToken 
+			outcome = parametry();
+			if (outcome != IS_OK)
+			{
+				return outcome;
+			}
+			break;
+		case P_ZAVORKA:
+			return IS_OK;
+			break;
+		default:
+			return SYN_ERR;
+	}
+	return IS_OK;
+}
+
+int slozeny(){
+	int outcome;
+	getToken 
+	switch(token){
+		//SLOZENY → lsz PRIKAZY psz
+		case PS_ZAVORKA:
+			return IS_OK;
+			break; //kvuli Korgymu a KAntymu
+		//PRIKAZY → PRIKAZ PRIKAZY
+		case ID:
+		case IF:
+		case FOR:
+		case RETURN:
+		case CIN:
+		case COUT:
+		case AUTO:
+		case INT:
+		case DOUBLE:
+		case STRING:
+			outcome = prikaz();
+			if (outcome != IS_OK)
+			{
+				return outcome;
+			}
+			if (token == PS_ZAVORKA)
+			{
+				return IS_OK;
+			}else{
+				return SYN_ERR;
+			}
+			break;
+		default:
+			return SYN_ERR;		
+	}
+}
+
+int prikaz(){
+	int outcome;
+	getToken
+	//PRIKAZY → eps
+	//PRIKAZ → PROMENNA	
+	//PRIKAZ → id prirazeni expr strednik	
+	//PRIKAZ → id prirazeni id lz TERMY pz strednik
+	//PRIKAZ → if lz expr pz SLOZENY else SLOZENY	
+	//PRIKAZ → for lz PROMENNA strednik expr strednik id prirazeni expr pz SLOZENY	
+	//PRIKAZ → return expr strednik	
+	//PRIKAZ → cin NACTENI strednik	
+	//PRIKAZ → cout VYPIS strednik 
+	switch(token){
+		case PS_ZAVORKA:
+			return IS_OK;
+			break;
+		case AUTO:
+		case INT:
+		case DOUBLE:
+		case STRING:
+			outcome = def_promenna();
+			if (outcome != IS_OK)
+			{
+				return outcome;
+			}
+			break;
+		case ID:
+			// najdi v tabulce
+			getToken 
+			if (token != PRIRAZENI)
+			{
+				return SYN_ERR;
+			}
+			getToken
+			switch(token){
+				//case expr: zasobnik expr - dodelat!! 
+			}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	}
+}
