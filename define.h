@@ -22,7 +22,7 @@
 #define VICE_NEBO_ROVNO	18 // '>='
 #define VICE 			19 // '>'
 #define PRIRAZENI		20 // '='
-#define CTENI			21 // '>>'	klidne si muzes prejmenovat ten define nez s nim zacnes pracovat
+#define CTENI			21 // '>>'	
 #define ZAPIS			22 // '<<'
 
 #define AUTO 			23 //klicova slova
@@ -51,3 +51,8 @@
 #define ROTHERS_ERR		-10 // ostatni behove chyby
 #define INTERNAL_ERR	-99
 #define IS_OK			0 // all okey
+
+#define SHIFT			1 // shift
+#define RPLCE			2 // replace
+#define HADLE			3 // handle
+#define SHERR 			4 // chyba v precedencce

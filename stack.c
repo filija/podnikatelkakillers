@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <define.h>
 
 #define MAXSTACK 30;
 
@@ -38,14 +39,18 @@ int stackInit(zStack *stack){
 	return 0;	
 }
 
-void stackPush(zStack *stack, tData *newData, int newClen){
+int stackPush(zStack *stack, tData *newData, int newClen){
 	if (*stack->vrchol == *stack->velikost){
 		*stack->velikost = MAXSTACK + *stack->velikost;
 		*stack->zP = realloc (*stack->zP, *stack->velikost * sizeof(sturct zasobnikHodnot));
+		if (stack->zP == NULL)
+			return INTERNAL_ERR;
 	}
 	*stack->vrchol++;
 	*stack->zP[*stack->vrchol].clen = newClen;
 	*stack->zP[*stack->vrchol].data = newData;
+
+	return IS_OK;
 }
 
 void stackPop(zStack *stack){
@@ -54,6 +59,15 @@ void stackPop(zStack *stack){
 		*stack->zP[*stack->vrchol].data = NULL;
 		*stack->vrchol--;
 	}
+}
+
+void stackPopAll(zStack *stack){
+	while (*stack->vrchol != 0){
+		*stack->zP[*stack->vrchol].clen = 0;
+		*stack->zP[*stack->vrchol].data = NULL;
+		*stack->vrchol--;
+	}
+
 }
 
 int stackTop(zStack *stack){

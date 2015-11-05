@@ -16,6 +16,7 @@ struct symbol_table *glob_table;
 // ptrStack stack;
 string attr;
 string *params;
+tSymbolPtr hledane_id;
 tSymbolPtr data; // data prubezna
 
 tList *List; // list instrukci
@@ -48,6 +49,29 @@ void generateVariable(string *var)
    result = InsertNew(LS, I);
    return result;
 }*/
+
+
+int Table [14][14] =
+// radek- vstupni token, sloupec- znak na zasobniku
+{ 
+//		   ID 	  (		  )       +        -      *       /       ==      <=       <      !=      >=      >       $
+/*ID*/	{RPLCE,	SHERR,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE},
+/*(*/	{SHIFT,	SHIFT,	HADLE,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHERR},
+/*)*/	{SHERR,	SHERR,	RPLCE,	RPLCE,	RPLCE	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE},
+/*+*/	{SHIFT,	SHIFT,	RPLCE,	RPLCE,	RPLCE,	SHIFT,	SHIFT,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE},
+/*-*/	{SHIFT,	SHIFT,	RPLCE,	RPLCE,	RPLCE,	SHIFT,	SHIFT,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE},
+/***/	{SHIFT,	SHIFT,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE},
+/*/*/	{SHIFT,	SHIFT,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE},
+/*==*/	{SHIFT,	SHIFT,	RPLCE,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE},
+/*<=*/	{SHIFT,	SHIFT,	RPLCE,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE},
+/*<*/	{SHIFT,	SHIFT,	RPLCE,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE},
+/*!=*/	{SHIFT,	SHIFT,	RPLCE,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE},
+/*>=*/	{SHIFT,	SHIFT,	RPLCE,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE},
+/*>*/	{SHIFT,	SHIFT,	RPLCE,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE},
+/*$*/	{SHIFT,	SHIFT,	SHERR,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHERR}
+
+};
+
 
 /*Hlavni funkce parseru*/
 int parse(struct symbol_table* table_hl, tList *list, ptrStack stack_hl){
@@ -320,7 +344,15 @@ int prikaz(){
 			}
 			break;
 		case ID:
-			// najdi v tabulce
+			hledane_id = najdi_v_tabulce(table,attr.str);
+			if (hledane_id == NULL) // najdi v tabulce
+			{
+				return SEM_ERR;
+			}
+			if ((hledane_id->defined) == 0)
+			{
+				return SEM_ERR;
+			}			
 			getToken 
 			if (token != PRIRAZENI)
 			{
@@ -329,6 +361,44 @@ int prikaz(){
 			getToken
 			switch(token){
 				//case expr: zasobnik expr - dodelat!! 
+				case ID:
+					hledane_id = najdi_v_tabulce(table,attr.str);
+					if (hledane_id == NULL) // najdi v tabulce
+					{
+						return SEM_ERR;
+					}
+					if ((hledane_id->defined) == 0)
+					{
+						return SEM_ERR;
+					}
+					if (hledane_id->verze) // funkce pro hodnotu 1
+					{
+						getToken
+						if (token != L_ZAVORKA)
+						{
+							return SYN_ERR;
+						}
+						// nacteni vsech parametru
+						getToken
+						if (token != P_ZAVORKA)
+						{
+							return SYN_ERR;
+						}
+						getToken
+						if (token != STREDNIK)
+						{
+							return SYN_ERR;
+						}
+						return IS_OK; //naprosto citelne
+						
+					}
+					// reseni vyrazu
+					getToken
+					if (token != STREDNIK)
+					{
+						return SYN_ERR;
+					}
+					return IS_OK;					
 			}
 
 
