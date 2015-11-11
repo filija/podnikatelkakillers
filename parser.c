@@ -360,7 +360,7 @@ int prikaz(){
 			}
 			getToken
 			switch(token){
-				//case expr: zasobnik expr - dodelat!! 
+				//case expr: zasobnik expr - dodelat!! >>>>        <<<<<
 				case ID:
 					hledane_id = najdi_v_tabulce(table,attr.str);
 					if (hledane_id == NULL) // najdi v tabulce
@@ -398,7 +398,8 @@ int prikaz(){
 					{
 						return SYN_ERR;
 					}
-					return IS_OK;					
+					return IS_OK;		
+					// zasobniky pro precedenci			
 			}
 
 
