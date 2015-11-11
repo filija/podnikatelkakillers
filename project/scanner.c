@@ -27,9 +27,9 @@ int strAddChar(string *s1, char c){
    if (s1->length + 1 >= s1->allocSize)
    {
       // pamet nestaci, je potreba provest realokaci
-      if ((s1->str = (char*) realloc(s1->str, s1->length + STR_LEN_INC)) == NULL)
+      if ((s1->str = (char*) realloc(s1->str, s1->length + sizeof(char))) == NULL)
          return 1;
-      s1->allocSize = s1->length + STR_LEN_INC;
+      s1->allocSize = s1->length + sizeof(char);
    }
    s1->str[s1->length] = c;
    s1->length++;
@@ -162,7 +162,7 @@ int getNextToken(string *attr){
     				return ROVNA_SE; // token -> [==, ]
     			else {
     				ungetc(c, source);
-   					return PRIRAZENI
+   					return PRIRAZENI;
 				}
 			break;
 
@@ -235,25 +235,25 @@ int getNextToken(string *attr){
 					strAddChar(attr, c);
 				else{
 					ungetc(c, source);
-					if (strCmpConstStr(attr, 'auto'))
+					if (strCmpConstStr(attr, "auto"))
 						return AUTO;
-					else if (strCmpConstStr(attr, 'cin'))
+					else if (strCmpConstStr(attr, "cin"))
 						return CIN;
-					else if (strCmpConstStr(attr, 'cout'))
+					else if (strCmpConstStr(attr, "cout"))
 						return COUT;
-					else if (strCmpConstStr(attr, 'double'))
+					else if (strCmpConstStr(attr, "double"))
 						return DOUBLE;
-					else if (strCmpConstStr(attr, 'else'))
+					else if (strCmpConstStr(attr, "else"))
 						return ELSE;
-					else if (strCmpConstStr(attr, 'for'))
+					else if (strCmpConstStr(attr, "for"))
 						return FOR;
-					else if (strCmpConstStr(attr, 'if'))
+					else if (strCmpConstStr(attr, "if"))
 						return IF;
-					else if (strCmpConstStr(attr, 'int'))
+					else if (strCmpConstStr(attr, "int"))
 						return INT;
-					else if (strCmpConstStr(attr, 'return'))
+					else if (strCmpConstStr(attr, "return"))
 						return RETURN;
-					else if (strCmpConstStr(attr, 'string'))
+					else if (strCmpConstStr(attr, "string"))
 						return STRING;
 					else
 						return ID;
