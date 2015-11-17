@@ -110,7 +110,7 @@ int program(){
 		case DOUBLE:
 		case STRING:
 		case EOF:
-			/*PROGRAM → DFUNKCE eof*/
+			/* PROGRAM → DFUNKCE eof */
 			outcome = dfunkce();
 			if (outcome != IS_OK) return outcome;
 			if (token != EOF) return SYN_ERR;
@@ -130,6 +130,7 @@ int dfunkce(){
 		case INT:
 		case DOUBLE:
 		case STRING:
+			/* DFUNKCE → FUNKCE DFUNKCE */
 			outcome = funkce();
 			if (outcome != IS_OK) return outcome;
 			outcome = dfunkce();
@@ -137,6 +138,7 @@ int dfunkce(){
 			return IS_OK;
 			break;
 		case EOF:
+			/* DFUNKCE → ε */
 			return IS_OK;
 			break;
 		default:
@@ -153,6 +155,7 @@ int funkce(){
 		case INT:
 		case DOUBLE:
 		case STRING:
+			/* FUNKCE → DEKLARACE DEFINICE */
 			outcome = deklarace();
 			if (outcome != IS_OK) return outcome;
 			outcome = definice();
@@ -173,6 +176,7 @@ int deklarace(){
 		case INT:
 		case DOUBLE:
 		case STRING:
+			/* DEKLARACE → PARAMETR lz PARAMETRY pz */
 			outcome = parametr();
 			if (outcome != IS_OK) return outcome;
 			if (token != L_ZAVORKA) return SYN_ERR;
@@ -187,4 +191,196 @@ int deklarace(){
 			return SYN_ERR;
 			break;
 	}	
+}
+
+int parametr(){
+
+	int outcome;
+	
+	switch(token){
+		case INT:
+		case DOUBLE:
+		case STRING:
+			/* PARAMETR → TYP id */
+			outcome = typ();
+			if (outcome != IS_OK) return outcome;
+			if (token != ID) return SYN_ERR;
+			//tady bude napriklad kod na pushuti ID do dat ktere se budou potom vkladat do tabulky
+			getToken
+			return IS_OK;
+			break;
+		default:
+			return SYN_ERR;
+			break;
+	}		
+}
+
+int typ(){
+
+	int outcome;
+	
+	switch(token){
+		case INT:
+			/*TYP → int*/
+			//zpracovani toho ze typ je INT (token nam zkontroluje switch, kterym do teto funkce lezeme)
+			getToken
+			return IS_OK;
+			break;
+		case DOUBLE:
+			/*TYP → double*/
+			// ----||----
+			getToken
+			return IS_OK;
+			break;
+		case STRING:
+			/*TYP → string*/
+			// ----||----
+			getToken
+			return IS_OK;
+			break;
+		default:
+			return SYN_ERR;
+			break;
+	}		
+
+}
+
+int parametry(){
+	int outcome;
+	
+	switch(token){
+		case INT:
+		case DOUBLE:
+		case STRING:
+			/*PARAMETRY → PARAMETR DPARAMETR*/
+			outcome = parametr();
+			if (outcome != IS_OK) return outcome;
+			outcome = dparametr();
+			if (outcome != IS_OK) return outcome;
+			return IS_OK;
+			break;
+		case P_ZAVORKA:
+			/*PARAMETRY → ε*/
+			return IS_OK;
+			break;
+		default:
+			return SYN_ERR;
+			break;
+	}	
+}
+
+int dparametr(){
+	int outcome;
+	
+	switch(token){
+		case CARKA:
+			/*DPARAMETR → carka PARAMETR DPARAMETR*/
+			//overeni tohoto tokenu za nas dela switch
+			getToken
+			outcome = parametr();
+			if (outcome != IS_OK) return outcome;
+			outcome = dparametr();
+			if (outcome != IS_OK) return outcome;
+			return IS_OK;
+			break;
+		case P_ZAVORKA:
+			/*DPARAMETR → ε*/
+			return IS_OK;
+			break;
+		default:
+			return SYN_ERR;
+			break;
+	}	
+}
+
+int definice(){
+	int outcome;
+	
+	switch(token){
+		case STREDNIK:
+			/*DEFINICE → strednik*/
+			getToken
+			return IS_OK;
+			break;
+		case LS_ZAVORKA:
+			/*DEFINICE → SLOZENY*/
+			outcome = slozeny();
+			if (outcome != IS_OK) return outcome;
+			return IS_OK;
+			break;
+		default:
+			return SYN_ERR;
+			break;
+	}	
+}
+
+int slozeny(){
+	int outcome;
+
+	switch(token){
+		case LS_ZAVORKA:
+			/*SLOZENY → lsz PRIKAZY psz*/
+			getToken
+			outcome = prikazy();
+			if (outcome != IS_OK) return outcome;
+			if (token != PS_ZAVORKA) return SYN_ERR;
+			getToken
+			return IS_OK;
+			break;
+		default:
+			return SYN_ERR;
+			break;
+	}
+}
+
+int prikazy(){
+	int outcome;
+
+	switch(token){
+		case INT:
+		case DOUBLE:
+		case STRING:
+		case ID:
+		case IF:
+		case FOR:
+		case RETURN:
+		case CIN:
+		case COUT:
+		case AUTO:
+			/*PRIKAZY → PRIKAZ PRIKAZY*/
+			outcome = prikaz();
+			if (outcome != IS_OK) return outcome;
+			outcome = prikazy();
+			if (outcome != IS_OK) return outcome;
+			return IS_OK;
+			break;
+		case PS_ZAVORKA:
+			/*PRIKAZY → ε*/
+			return IS_OK;
+			break;
+		default:
+			return SYN_ERR;
+			break;
+	}
+
+}
+
+int prikaz(){
+	int outcome;
+	//DODELAT!!!!
+	switch(token){
+		case INT:
+		case DOUBLE:
+		case STRING:
+		case ID:
+		case IF:
+		case FOR:
+		case RETURN:
+		case CIN:
+		case COUT:
+		case AUTO:
+		default:
+			return SYN_ERR;
+			break;
+	}
 }

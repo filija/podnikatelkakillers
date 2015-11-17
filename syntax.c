@@ -53,7 +53,7 @@ int Table [14][14] =
 
 //samotny kod PSA (precedencni SA)
 
-getToken;	//asi nebude nutny, zalezi jestli ten token prvni za nas dostane LL nebo ne
+//token prijde od LL, vzdy se dalsi token nacita po jeho zpracovani, ne pred nim!
 //push na teminallist DOLAR 
 nacteny = prec_prevod(&token, &attr);	//zase otazka jestli se ma pouzit dereference, nebo attr sam o sbe je ukazatel, pak se podivat a poresit na vsech mistech
 do{
