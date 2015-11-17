@@ -50,7 +50,7 @@ int vloz_do_tabulky(uk_uzel Koren, char *K, tSymbol data)	{	// vlozi data s klic
 		uk_uzel help_ptr;
 		help_ptr = malloc(sizeof(struct SymbolTable));
 		if ( help_ptr == NULL ){
-			exit(99);
+			return INTERNAL_ERR;
 		}
 		help_ptr->symbol = K;
 		help_ptr->data = data;
@@ -58,7 +58,7 @@ int vloz_do_tabulky(uk_uzel Koren, char *K, tSymbol data)	{	// vlozi data s klic
 		help_ptr->RPtr = NULL;
 		Koren = help_ptr;
 	}
-	return 0;
+	return IS_OK;
 }
 /*
 Funkce zrusi tabulku
@@ -93,6 +93,28 @@ void check(uk_uzel Koren)	{ // vyhledani uzlu zadaneho klicem
 		}
 	}
 
-		check(Koren->LPtr);	// klic menci nez zadany - jedeme vlevo
-		check(Koren->RPtr);	// jinak vrpavo a znova
+		check(Koren->LPtr);	// klic mensi nez zadany - jedeme vlevo
+		check(Koren->RPtr);	// jinak vpravo a znova
+}
+
+/*
+* Funkce provede deep copy struktury dat v tabulce symbolu
+* @param cilovy ukazatel na strukturu
+* @param zdrojovy ukazatel na strukturu dat
+* @return potvrzeni uspesnosti nebo vnitrni chybu
+*/
+int copy_item(tSymbolPtr dest, tSymbolPtr source){
+	tSymbolPtr ukazatel;
+	ukazatel = malloc(sizeof(struct sym));
+	if(help_ptr == NULL){
+		return INTERNAL_ERR; // right code?
+	}
+	ukazatel->symbol = source->symbol;
+	ukazatel->typ = source->typ;
+	ukazatel->verze = source->verze;
+	ukazatel->value = source->value;
+	ukazatel->par_typy = source->par_typy;
+	ukazatel->defined = source->defined;
+	dest = ukazatel;
+	return IS_OK;
 }
