@@ -38,3 +38,4 @@ tSymbolPtr najdi_v_tabulce  (uk_uzel, char*);
 int vloz_do_tabulky (uk_uzel, char*, tSymbol);
 void znic_tabulku(uk_uzel);
 void check(uk_uzel);
+int copy_item(tSymbolPtr, tSymbolPtr);

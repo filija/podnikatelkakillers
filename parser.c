@@ -399,7 +399,8 @@ int prikaz(){
 						return SYN_ERR;
 					}
 					return IS_OK;		
-					// zasobniky pro precedenci			
+					// zasobniky pro precedenci
+					// 			
 			}
 
 
