@@ -1,0 +1,47 @@
+PROGRAM -> DFUNKCE eof			
+DFUNKCE -> FUNKCE DFUNKCE
+FUNKCE -> DEKLARACE SLOZENY	
+FUNKCE -> DEKLARACE strednik	
+DFUNKCE -> EPSILON
+DEKLARACE -> PARAMETR lz PARAMETRY pz
+TYP -> int
+TYP -> double
+TYP -> string
+PARAMETRY -> EPSILON
+PARAMETRY -> PARAMETR DPARAMETR
+DPARAMETR -> carka PARAMETR DPARAMETR
+DPARAMETR -> EPSILON
+PARAMETR -> TYP id
+SLOZENY -> lsz PRIKAZY psz					
+PRIKAZY -> PRIKAZ PRIKAZY
+PRIKAZY -> EPSILON
+
+PRIKAZ -> PROMENNA strednik					
+PRIKAZ -> id rovnitko PRIRAZENI strednik
+PRIKAZ -> if lz expr pz SLOZENY else SLOZENY
+PRIKAZ -> for lz PROMENNA strednik expr strednik id rovnitko expr pz SLOZENY
+PRIKAZ -> return expr strednik
+PRIKAZ -> cin NACTENI strednik
+PRIKAZ -> cout VYPIS strednik
+
+PRIRAZENI -> id lz TERMY pz
+PRIRAZENI -> expr
+
+NACTENI -> nacti id DNACTENI
+DNACTENI -> NACTENI					
+DNACTENI -> EPSILON
+VYPIS -> pis TERM DVYPIS
+DVYPIS -> VYPIS						
+DVYPIS -> EPSILON
+
+PROMENNA -> PARAMETR PRIRAD
+PROMENNA -> auto id rovnitko expr
+PRIRAD -> rovnitko expr
+PRIRAD -> EPSILON
+
+TERMY -> TERM DTERM
+TERMY -> EPSILON
+DTERM -> carka TERM DTERM
+DTERM -> EPSILON
+TERM -> literal
+TERM -> id
