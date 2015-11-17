@@ -39,6 +39,8 @@
 
 #define EOF				34
 
+#define DOLAR			35
+
 #define LEX_ERR			-1
 #define SYN_ERR			-2
 #define SEM_ERR			-3
@@ -54,5 +56,5 @@
 
 #define SHIFT			1 // shift
 #define RPLCE			2 // replace
-#define HADLE			3 // handle
+#define HANDL			3 // handle
 #define SHERR 			4 // chyba v precedencce

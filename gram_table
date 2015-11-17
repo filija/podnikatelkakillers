@@ -1,0 +1,69 @@
+		   eof lz  pz  int dbl str  ,  id  lsz psz  ;   =  if expr els for ret cin cout >> << auto liter $ 
+PROGRAM		1	-	-	1	1	1	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+DFUNKCE		3	-	-	2	2	2	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+FUNKCE		-	-	-	4	4	4	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+DEKLARACE	-	-	-	5	5	5	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+TYP			-	-	-	6	7	8	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+PARAMETRY	-	-	9	10	10	10	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+DPARAMETR	-	-	12	-	-	-	11	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+PARAMETR	-	-	-	13	13	13	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+SLOZENY		-	-	-	-	-	-	-	-	14	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+PRIKAZY		-	-	-	15	15	15	-	15	-	16	-	-	15	-	-	15	15	15	15	-	-	15	-	-
+DEFINICE	-	-	-	-	-	-	-	-	18	-	17	-	-	-	-	-	-	-	-	-	-	-	-	-
+PRIKAZ		-	-	-	19	19	19	-	20	-	-	-	-	21	-	-	22	23	24	25	-	-	19	-	-
+PRIRAZENI	-	-	-	-	-	-	-	26	-	-	-	-	-	27	-	-	-	-	-	-	-	-	-	-
+NACTENI		-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	28	-	-	-	-
+DNACTENI	-	-	-	-	-	-	-	-	-	-	30	-	-	-	-	-	-	-	-	29	-	-	-	-
+VYPIS		-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	31	-	-	-
+DVYPIS		-	-	-	-	-	-	-	-	-	-	33	-	-	-	-	-	-	-	-	-	32	-	-	-
+PROMENNA	-	-	-	34	34	34	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	35	-	-
+PRIRAD		-	-	-	-	-	-	-	-	-	-	37	36	-	-	-	-	-	-	-	-	-	-	-	-
+TERMY		-	-	39	-	-	-	-	38	-	-	-	-	-	-	-	-	-	-	-	-	-	-	38	-
+DTERM		-	-	41	-	-	-	40	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-
+TERMY		-	-	-	-	-	-	-	43	-	-	-	-	-	-	-	-	-	-	-	-	-	-	42	-
+
+
+
+1	PROGRAM → DFUNKCE eof
+2	DFUNKCE → FUNKCE DFUNKCE
+3	DFUNKCE → ε
+4	FUNKCE → DEKLARACE DEFINICE
+5	DEKLARACE → PARAMETR lz PARAMETRY pz
+6	TYP → int
+7	TYP → double
+8	TYP → string
+9	PARAMETRY → ε
+10	PARAMETRY → PARAMETR DPARAMETR
+11	DPARAMETR → carka PARAMETR DPARAMETR
+12	DPARAMETR → ε
+13	PARAMETR → TYP id
+14	SLOZENY → lsz PRIKAZY psz
+15	PRIKAZY → PRIKAZ PRIKAZY
+16	PRIKAZY → ε
+17	DEFINICE → strednik
+18	DEFINICE → SLOZENY
+19	PRIKAZ → PROMENNA strednik
+20	PRIKAZ → id rovnitko PRIRAZENI strednik
+21	PRIKAZ → if lz expr pz SLOZENY else SLOZENY
+22	PRIKAZ → for lz PROMENNA strednik expr strednik id rovnitko expr pz SLOZENY
+23	PRIKAZ → return expr strednik
+24	PRIKAZ → cin NACTENI strednik
+25	PRIKAZ → cout VYPIS strednik
+26	PRIRAZENI → id lz TERMY pz
+27	PRIRAZENI → expr
+28	NACTENI → nacti id DNACTENI
+29	DNACTENI → NACTENI
+30	DNACTENI → ε
+31	VYPIS → pis TERM DVYPIS
+32	DVYPIS → VYPIS
+33	DVYPIS → ε
+34	PROMENNA → PARAMETR PRIRAD
+35	PROMENNA → auto id rovnitko expr
+36	PRIRAD → rovnitko expr
+37	PRIRAD → ε
+38	TERMY → TERM DTERM
+39	TERMY → ε
+40	DTERM → carka TERM DTERM
+41	DTERM → ε
+42	TERM → literal
+43	TERM → id
