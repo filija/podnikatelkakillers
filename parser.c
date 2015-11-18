@@ -129,6 +129,7 @@ int dfunkce(){
 		case INT:
 		case DOUBLE:
 		case STRING:
+			/*DFUNKCE → FUNKCE DFUNKCE*/
 			outcome = funkce();
 			if (outcome != IS_OK) return outcome;
 			outcome = dfunkce();
@@ -136,6 +137,7 @@ int dfunkce(){
 			return IS_OK;
 			break;
 		case EOF:
+			/*DFUNKCE → ε*/
 			return IS_OK;
 			break;
 		default:
@@ -152,6 +154,7 @@ int funkce(){
 		case INT:
 		case DOUBLE:
 		case STRING:
+			/*FUNKCE → DEKLARACE DEFINICE*/
 			outcome = deklarace();
 			if (outcome != IS_OK) return outcome;
 			outcome = definice();
@@ -172,6 +175,7 @@ int deklarace(){
 		case INT:
 		case DOUBLE:
 		case STRING:
+			/*DEKLARACE → PARAMETR lz PARAMETRY pz*/
 			outcome = parametr();
 			if (outcome != IS_OK) return outcome;
 			if (token != L_ZAVORKA) return SYN_ERR;
@@ -194,12 +198,18 @@ int typ(){
 
 	switch(token){
 		case INT:
+			/*TYP → int*/
+			getToken
 			return IS_OK;
 			break;
 		case DOUBLE:
+			/*TYP → double*/
+			getToken
 			return IS_OK;
 			break;
 		case STRING:
+			/*TYP → string*/
+			getToken
 			return IS_OK;
 			break;
 		default:
@@ -220,7 +230,6 @@ int parametry(){
 			if (outcome != IS_OK) return outcome;
 			outcome = dparametr();
 			if (outcome != IS_OK) return outcome;
-			getToken
 			return IS_OK;
 			break;
 		case P_ZAVORKA:
@@ -238,15 +247,16 @@ int dparametr(){
 	int outcome;
 	switch(token){
 		case P_ZAVORKA:
+			/*DPARAMETR → ε*/
 			return IS_OK;
 			break;
 		case CARKA:
+			/*DPARAMETR → carka PARAMETR DPARAMETR*/
 			getToken
 			outcome = parametr();
 			if (outcome != IS_OK) return outcome;
 			outcome = dparametr();
 			if (outcome != IS_OK) return outcome;
-			getToken
 			return IS_OK;
 			break;
 		default:
@@ -263,6 +273,7 @@ int parametr(){
 		case INT:
 		case DOUBLE:
 		case STRING:
+			/*PARAMETR → TYP id*/
 			outcome = typ();
 			if (outcome != IS_OK) return outcome;
 			if (token != ID) return SYN_ERR;
@@ -312,7 +323,6 @@ int prikazy(){
 			if (outcome != IS_OK) return outcome;
 			outcome = prikazy();
 			if (outcome != IS_OK) return outcome;
-			getToken
 			return IS_OK;
 			break;
 		case PS_ZAVORKA:
@@ -326,17 +336,17 @@ int prikazy(){
 }	
 
 int definice(){
-	/* DEFINICE → strednik */
+	/* DEFINICE → SLOZENY */
 	int outcome;
 	switch(token){
 		case LS_ZAVORKA:
 			outcome = slozeny();
 			if (outcome != IS_OK) return outcome;
-			getToken
 			return IS_OK;
 			break;
 		case STREDNIK:
 		/* DEFINICE → strednik */
+			getToken
 			return IS_OK;
 			break;
 		default:
@@ -376,7 +386,7 @@ int prikaz(){
 			if (token != L_ZAVORKA) return SYN_ERR;
 			getToken
 			// expr
-			getToken // tezko rict viz dole (hint 397)
+			// expr dava nacteny dalsi token
 			if (token != P_ZAVORKA) return SYN_ERR;
 			getToken
 			outcome = slozeny();
@@ -397,7 +407,7 @@ int prikaz(){
 			if (token != STREDNIK) return SYN_ERR;
 			getToken
 			// expr
-			getToken // mozna nemusi byt
+			// expr dava nacteny dalsi token
 			if (token != STREDNIK) return SYN_ERR;
 			getToken
 			if (token != ID) return SYN_ERR;
@@ -405,7 +415,7 @@ int prikaz(){
 			if (token != PRIRAZENI) return SYN_ERR;
 			getToken
 			// expr
-			getToken // mozna nemusi byt vit nahore (hint 397)
+			// expr dava nacteny dalsi token
 			if (token != P_ZAVORKA) return SYN_ERR;
 			getToken
 			outcome = slozeny();
@@ -416,7 +426,7 @@ int prikaz(){
 		case RETURN:
 			getToken
 			// expr
-			getToken // tezko rict
+			// expr dava nacteny dalsi token
 			if (token != STREDNIK) return SYN_ERR;
 			getToken
 			return IS_OK;
@@ -456,9 +466,10 @@ int prirazeni(){
 			outcome = termy();
 			if (outcome != IS_OK) return outcome;
 			if (token != P_ZAVORKA) return SYN_ERR;
+			getToken
 			return IS_OK;
 			break;
-		// case expresiion <<<
+		// case expresiion <<< PRIRAZENI → expr
 		default:
 			return SYN_ERR;
 			break;
@@ -545,12 +556,11 @@ int promenna(){
 		case INT:
 		case DOUBLE:
 		case STRING:
-			/* 34	PROMENNA → PARAMETR PRIRAD */
+			/* PROMENNA → PARAMETR PRIRAD */
 			outcome = parametr();
 			if (outcome != IS_OK) return outcome;
 			outcome = prirad();
 			if (outcome != IS_OK) return outcome;
-			getToken
 			return IS_OK;
 			break;
 		case AUTO:
@@ -600,7 +610,6 @@ int termy(){
 			if (outcome != IS_OK) return outcome;
 			outcome = dterm();
 			if (outcome != IS_OK) return outcome;
-			getToken
 			return IS_OK;
 			break;
 		case P_ZAVORKA:
@@ -627,7 +636,6 @@ int dterm(){
 			if (outcome != IS_OK) return outcome;
 			outcome = dterm();
 			if (outcome != IS_OK) return outcome;
-			getToken
 			return IS_OK;
 			break;
 		default:
@@ -641,12 +649,22 @@ int term(){
 	switch(token){
 		/* TERM → id */
 		case ID:
+			getToken
 			return IS_OK;
 			break;
 		case INT_V:
+			/* TERM → literal */
+			getToken
+			return IS_OK;
+			break;
 		case DOUBLE_V:
+			/* TERM → literal */
+			getToken
+			return IS_OK;
+			break;
 		case STRING_V:
-		/* TERM → literal */
+			/* TERM → literal */
+			getToken
 			return IS_OK;
 			break;
 		default:
