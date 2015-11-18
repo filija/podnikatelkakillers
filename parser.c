@@ -110,10 +110,10 @@ int program(){
 		case DOUBLE:
 		case STRING:
 		case EOF:
-			/* PROGRAM → DFUNKCE eof */
+			/*PROGRAM → DFUNKCE eof*/
 			outcome = dfunkce();
-			if (outcome != IS_OK) return outcome;
-			if (token != EOF) return SYN_ERR;
+			if (outcome != IS_OK) return outcome;	
+			if (token != EOF) return SYN_ERR;		
 			return IS_OK;
 			break;
 		default:
@@ -125,12 +125,10 @@ int program(){
 int dfunkce(){
 		/*<DFUNKCE>*/
 	int outcome;
-	
 	switch(token){
 		case INT:
 		case DOUBLE:
 		case STRING:
-			/* DFUNKCE → FUNKCE DFUNKCE */
 			outcome = funkce();
 			if (outcome != IS_OK) return outcome;
 			outcome = dfunkce();
@@ -138,7 +136,6 @@ int dfunkce(){
 			return IS_OK;
 			break;
 		case EOF:
-			/* DFUNKCE → ε */
 			return IS_OK;
 			break;
 		default:
@@ -155,7 +152,6 @@ int funkce(){
 		case INT:
 		case DOUBLE:
 		case STRING:
-			/* FUNKCE → DEKLARACE DEFINICE */
 			outcome = deklarace();
 			if (outcome != IS_OK) return outcome;
 			outcome = definice();
@@ -176,7 +172,6 @@ int deklarace(){
 		case INT:
 		case DOUBLE:
 		case STRING:
-			/* DEKLARACE → PARAMETR lz PARAMETRY pz */
 			outcome = parametr();
 			if (outcome != IS_OK) return outcome;
 			if (token != L_ZAVORKA) return SYN_ERR;
@@ -193,133 +188,95 @@ int deklarace(){
 	}	
 }
 
-int parametr(){
-
-	int outcome;
-	
-	switch(token){
-		case INT:
-		case DOUBLE:
-		case STRING:
-			/* PARAMETR → TYP id */
-			outcome = typ();
-			if (outcome != IS_OK) return outcome;
-			if (token != ID) return SYN_ERR;
-			//tady bude napriklad kod na pushuti ID do dat ktere se budou potom vkladat do tabulky
-			getToken
-			return IS_OK;
-			break;
-		default:
-			return SYN_ERR;
-			break;
-	}		
-}
-
 int typ(){
-
+	/* TYP */
 	int outcome;
-	
+
 	switch(token){
 		case INT:
-			/*TYP → int*/
-			//zpracovani toho ze typ je INT (token nam zkontroluje switch, kterym do teto funkce lezeme)
-			getToken
-			return IS_OK;
-			break;
 		case DOUBLE:
-			/*TYP → double*/
-			// ----||----
-			getToken
-			return IS_OK;
-			break;
 		case STRING:
-			/*TYP → string*/
-			// ----||----
 			getToken
 			return IS_OK;
 			break;
 		default:
 			return SYN_ERR;
 			break;
-	}		
-
+	}
 }
 
 int parametry(){
+		/*<PARAMETRY>*/
 	int outcome;
-	
 	switch(token){
 		case INT:
 		case DOUBLE:
 		case STRING:
-			/*PARAMETRY → PARAMETR DPARAMETR*/
+		/* PARAMETRY → PARAMETR DPARAMETR */
 			outcome = parametr();
 			if (outcome != IS_OK) return outcome;
 			outcome = dparametr();
 			if (outcome != IS_OK) return outcome;
+			getToken
 			return IS_OK;
 			break;
 		case P_ZAVORKA:
-			/*PARAMETRY → ε*/
+		/* PARAMETRY → ε */
 			return IS_OK;
 			break;
 		default:
 			return SYN_ERR;
 			break;
-	}	
+	}
 }
 
 int dparametr(){
+	/*<DPARAMETRY>*/
 	int outcome;
-	
 	switch(token){
+		case P_ZAVORKA:
+			return IS_OK;
+			break;
 		case CARKA:
-			/*DPARAMETR → carka PARAMETR DPARAMETR*/
-			//overeni tohoto tokenu za nas dela switch
 			getToken
 			outcome = parametr();
 			if (outcome != IS_OK) return outcome;
 			outcome = dparametr();
 			if (outcome != IS_OK) return outcome;
-			return IS_OK;
-			break;
-		case P_ZAVORKA:
-			/*DPARAMETR → ε*/
-			return IS_OK;
-			break;
-		default:
-			return SYN_ERR;
-			break;
-	}	
-}
-
-int definice(){
-	int outcome;
-	
-	switch(token){
-		case STREDNIK:
-			/*DEFINICE → strednik*/
 			getToken
 			return IS_OK;
 			break;
-		case LS_ZAVORKA:
-			/*DEFINICE → SLOZENY*/
-			outcome = slozeny();
+		default:
+			return SYN_ERR;
+			break;
+	}
+}
+
+int parametr(){
+	/* PARAMETR */
+	int outcome;
+
+	switch(token){
+		case INT:
+		case DOUBLE:
+		case STRING:
+			outcome = typ();
 			if (outcome != IS_OK) return outcome;
+			if (token != ID) return SYN_ERR;
+			getToken
 			return IS_OK;
 			break;
 		default:
 			return SYN_ERR;
 			break;
-	}	
+	}
 }
 
 int slozeny(){
+	/* SLOZENY → lsz PRIKAZY psz */
 	int outcome;
-
 	switch(token){
 		case LS_ZAVORKA:
-			/*SLOZENY → lsz PRIKAZY psz*/
 			getToken
 			outcome = prikazy();
 			if (outcome != IS_OK) return outcome;
@@ -334,6 +291,7 @@ int slozeny(){
 }
 
 int prikazy(){
+	/* PRIKAZY → PRIKAZ PRIKAZY */
 	int outcome;
 
 	switch(token){
@@ -347,40 +305,143 @@ int prikazy(){
 		case CIN:
 		case COUT:
 		case AUTO:
-			/*PRIKAZY → PRIKAZ PRIKAZY*/
 			outcome = prikaz();
 			if (outcome != IS_OK) return outcome;
 			outcome = prikazy();
 			if (outcome != IS_OK) return outcome;
+			getToken
 			return IS_OK;
 			break;
 		case PS_ZAVORKA:
-			/*PRIKAZY → ε*/
+		/* PRIKAZY → ε */
 			return IS_OK;
 			break;
 		default:
 			return SYN_ERR;
 			break;
 	}
+}	
 
+int definice(){
+	/* DEFINICE → strednik */
+	int outcome;
+	switch(token){
+		case LS_ZAVORKA:
+			outcome = slozeny();
+			if (outcome != IS_OK) return outcome;
+			getToken
+			return IS_OK;
+			break;
+		case STREDNIK:
+		/* DEFINICE → strednik */
+			return IS_OK;
+			break;
+		default:
+			return SYN_ERR;
+			break;
+	}
 }
 
 int prikaz(){
+	/* PRIKAZ → PROMENNA strednik */
 	int outcome;
-	//DODELAT!!!!
 	switch(token){
 		case INT:
 		case DOUBLE:
 		case STRING:
-		case ID:
-		case IF:
-		case FOR:
-		case RETURN:
-		case CIN:
-		case COUT:
 		case AUTO:
+			outcome = promenna();
+			if (outcome != IS_OK) return outcome;
+			if (token != STREDNIK) return SYN_ERR;
+			getToken
+			return IS_OK;
+			break;
+		/* PRIKAZ → id rovnitko PRIRAZENI strednik */
+		case ID:
+			getToken
+			if (token != PRIRAZENI) return SYN_ERR;			
+			getToken
+			outcome = prirazeni();
+			if (outcome != IS_OK) return outcome;
+			if (token != STREDNIK) return SYN_ERR;
+			getToken
+			return IS_OK;
+			break;
+		/* PRIKAZ → if lz expr pz SLOZENY else SLOZENY */
+		case IF:
+			getToken
+			if (token != L_ZAVORKA) return SYN_ERR;
+			getToken
+			// expr
+			getToken // tezko rict viz dole (hint 397)
+			if (token != P_ZAVORKA) return SYN_ERR;
+			getToken
+			outcome = slozeny();
+			if (outcome != IS_OK) return outcome;
+			if (token != ELSE) return SYN_ERR;
+			getToken
+			outcome = slozeny();
+			if (outcome != IS_OK) return outcome;
+			return IS_OK;
+			break;
+		/* PRIKAZ → for lz PROMENNA strednik expr strednik id rovnitko expr pz SLOZENY */
+		case FOR:
+			getToken
+			if (token != L_ZAVORKA) return SYN_ERR;
+			getToken
+			outcome = promenna();
+			if (outcome != IS_OK) return outcome;
+			if (token != STREDNIK) return SYN_ERR;
+			getToken
+			// expr
+			getToken // mozna nemusi byt
+			if (token != STREDNIK) return SYN_ERR;
+			getToken
+			if (token != ID) return SYN_ERR;
+			getToken
+			if (token != PRIRAZENI) return SYN_ERR;
+			getToken
+			// expr
+			getToken // mozna nemusi byt vit nahore (hint 397)
+			if (token != P_ZAVORKA) return SYN_ERR;
+			getToken
+			outcome = slozeny();
+			if (outcome != IS_OK) return outcome;
+			return IS_OK;
+			break;
+		/* PRIKAZ → return expr strednik */
+		case RETURN:
+			getToken
+			// expr
+			getToken // tezko rict
+			if (token != STREDNIK) return SYN_ERR;
+			getToken
+			return IS_OK;
+			break;
+		/* PRIKAZ → cin NACTENI strednik */
+		case CIN:
+			getToken
+			outcome = nacteni();
+			if (outcome != IS_OK) return outcome;
+			if (token != STREDNIK) return SYN_ERR;
+			getToken
+			return IS_OK;
+			break;
+		/* PRIKAZ → cout VYPIS strednik */
+		case COUT:
+			getToken
+			outcome = vypis();
+			if (outcome != IS_OK) return outcome;
+			if (token != STREDNIK) return SYN_ERR;
+			getToken
+			return IS_OK;
+			break;
 		default:
 			return SYN_ERR;
 			break;
 	}
+}
+
+int prirazeni(){
+
 }
