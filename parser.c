@@ -194,9 +194,12 @@ int typ(){
 
 	switch(token){
 		case INT:
+			return IS_OK;
+			break;
 		case DOUBLE:
+			return IS_OK;
+			break;
 		case STRING:
-			getToken
 			return IS_OK;
 			break;
 		default:
@@ -443,5 +446,211 @@ int prikaz(){
 }
 
 int prirazeni(){
+	int outcome;
+	switch(token){
+		/* PRIRAZENI → id lz TERMY pz */
+		case ID:
+			getToken
+			if (token != L_ZAVORKA) return SYN_ERR;
+			getToken
+			outcome = termy();
+			if (outcome != IS_OK) return outcome;
+			if (token != P_ZAVORKA) return SYN_ERR;
+			return IS_OK;
+			break;
+		// case expresiion <<<
+		default:
+			return SYN_ERR;
+			break;
+	}
+}
 
+int nacteni(){
+	int outcome;
+	switch(token){
+		/* NACTENI → nacti id DNACTENI */
+		case CTENI:
+			getToken
+			if (token != ID) return SYN_ERR;
+			getToken 
+			outcome = dnacteni();
+			if (outcome != IS_OK) return outcome;
+			return IS_OK;
+			break;
+		default:
+			return SYN_ERR;
+			break;
+	}
+}
+
+int dnacteni(){
+	int outcome;
+	switch(token){
+		/* DNACTENI → NACTENI */
+		case CTENI:
+			outcome = nacteni();
+			if (outcome != IS_OK) return outcome;
+			return IS_OK;
+			break;
+		/* DNACTENI → ε */
+		case STREDNIK:
+			return IS_OK;
+			break;
+		default:
+			return SYN_ERR;
+			break;
+	}
+}
+
+int vypis(){
+	int outcome;
+	switch(token){
+		/* VYPIS → pis TERM DVYPIS */
+		case ZAPIS:
+			getToken
+			outcome = term();
+			if (outcome != IS_OK) return outcome;
+			outcome = dvypis();
+			if (outcome != IS_OK) return outcome;
+			return IS_OK;
+			break;
+		default:
+			return SYN_ERR;
+			break;
+	}
+}
+
+int dvypis(){
+	int outcome;
+	switch(token){
+		/* DVYPIS → VYPIS */
+		case ZAPIS:
+			outcome = vypis();
+			if (outcome != IS_OK) return outcome;
+			return IS_OK;
+			break;
+		/* DVYPIS → ε */
+		case STREDNIK:
+			return IS_OK;
+			break;
+		default:
+			return SYN_ERR;
+			break;
+	}
+}
+
+int promenna(){
+	int outcome;
+	switch(token){
+		case INT:
+		case DOUBLE:
+		case STRING:
+			/* 34	PROMENNA → PARAMETR PRIRAD */
+			outcome = parametr();
+			if (outcome != IS_OK) return outcome;
+			outcome = prirad();
+			if (outcome != IS_OK) return outcome;
+			getToken
+			return IS_OK;
+			break;
+		case AUTO:
+		 /* PROMENNA → auto id rovnitko expr */
+			getToken
+			if (token != ID) return SYN_ERR;
+			getToken
+			if (token != ROVNITKO) return SYN_ERR;
+			getToken
+			//expression 
+			return IS_OK;
+			break;
+		default:
+		 	return SYN_ERR;
+		 	break;
+	}
+}
+
+int prirad(){
+	int outcome;
+	switch(token){
+		case PRIRAZENI:
+		/* PRIRAD → rovnitko expr */	
+			getToken
+			//expr
+			return IS_OK;
+			break;
+		case STREDNIK:
+		/* PRIRAD → ε */
+			return IS_OK;
+			break;
+		default:
+			return SYN_ERR;
+			break;
+	}
+}
+
+int termy(){
+	int outcome;
+	switch(token){
+		/* TERMY → TERM DTERM */
+		case ID:
+		case INT_V:
+		case DOUBLE_V:
+		case STRING_V:
+			outcome = term();
+			if (outcome != IS_OK) return outcome;
+			outcome = dterm();
+			if (outcome != IS_OK) return outcome;
+			getToken
+			return IS_OK;
+			break;
+		case P_ZAVORKA:
+		/* TERMY → ε */
+			return IS_OK;
+			break;
+		default:
+			return SYN_ERR;
+			break;
+	}
+}
+
+int dterm(){
+	int outcome;
+	switch(token){
+		case P_ZAVORKA:
+		/* DTERM → ε */
+			return IS_OK;
+			break;
+		/* DTERM → carka TERM DTERM */
+		case CARKA:
+			getToken
+			outcome = term();
+			if (outcome != IS_OK) return outcome;
+			outcome = dterm();
+			if (outcome != IS_OK) return outcome;
+			getToken
+			return IS_OK;
+			break;
+		default:
+			return SYN_ERR;
+			break;
+	}
+}
+
+int term(){
+	int outcome;
+	switch(token){
+		/* TERM → id */
+		case ID:
+			return IS_OK;
+			break;
+		case INT_V:
+		case DOUBLE_V:
+		case STRING_V:
+		/* TERM → literal */
+			return IS_OK;
+			break;
+		default:
+			return SYN_ERR;
+			break;
+	}
 }
