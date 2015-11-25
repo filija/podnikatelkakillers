@@ -73,6 +73,10 @@ void znic_tabulku(uk_uzel Koren) {	//zruseni storomu
 	}
 	znic_tabulku((Koren)->LPtr); // jedem vlevo
 	znic_tabulku((Koren)->RPtr);	// jedem vpravo
+	free(Koren->symbol);
+	free(Koren->data->symbol);
+	free(Koren->data->par_typy);
+	free(Koren->data);
 	free(Koren);
 	Koren = NULL;
 }

@@ -22,6 +22,8 @@ typedef struct sym   // symbol
     uObsah value;        // obsah int, float, string
     char *par_typy; // typy parametru void f(string, bool, bool) >> vsbb
     int defined; // 1 ano, 0 ne
+    uk_uzel tabulka; // ukazatel na tabulku - glob ->lok
+    // ukazatel na label
 } tSymbol, *tSymbolPtr;
 
 typedef struct SymbolTable
