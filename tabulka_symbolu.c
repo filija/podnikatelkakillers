@@ -110,15 +110,16 @@ void check(uk_uzel Koren)	{ // vyhledani uzlu zadaneho klicem
 int copy_item(tSymbolPtr dest, tSymbolPtr source){
 	tSymbolPtr ukazatel;
 	ukazatel = malloc(sizeof(struct sym));
-	if(help_ptr == NULL){
+	if(ukazatel == NULL){
 		return INTERNAL_ERR; // right code?
 	}
-	ukazatel->symbol = source->symbol;
+	ukazatel->symbol = strdup(source->symbol);
 	ukazatel->typ = source->typ;
 	ukazatel->verze = source->verze;
 	ukazatel->value = source->value;
-	ukazatel->par_typy = source->par_typy;
+	ukazatel->par_typy = strdup(source->par_typy);
 	ukazatel->defined = source->defined;
+	ukazatel->tabulka = source->tabulka;
 	dest = ukazatel;
 	return IS_OK;
 }
