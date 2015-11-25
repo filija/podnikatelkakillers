@@ -147,6 +147,7 @@ int dfunkce(){
 }
 
 int funkce(){
+	//nekde pri deklaraci funkce, se bude kontrolovat, jeslti nazev funkce neni shodny s klicovym slovem
 		/*<FUNKCE>*/
 	int outcome;
 	

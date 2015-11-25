@@ -2,30 +2,45 @@
 #include "stack.h"
 
 typedef struct listPrecedence {
-    struct listPrecedence *prev;
+    struct listPrecedence *next;
     int s_token;
-    string promenna;
+    char *promenna;
 } *PrcPtr;	//11.11.2015 19:15 prc by Korgo
 //dopsat inicializaci, pridani, odebrani
-
-int pushPrc(int s_token, string promenna, PrcPtr list) {	//navratova hodnota funkce je jestli byla vnitrni chyba, nebo ne
-	//todo
-	//mozna pro terminal_list vytvorit variantu, kde se nepushuje promenna
+//stringy uvnitr kopirovat pro ID, u ostatnich neni relevatni a muze byt string NULL
+int pushPrc(int s_token, char* promenna, PrcPtr list) {	//navratova hodnota funkce je jestli byla vnitrni chyba, nebo ne
+	PrcPtr tmpItem;
+	if ( (tmpItem = malloc(sizeof(struct listPrecedence))) == NULL )return INTERNAL_ERR;
+	tmpItem->s_token = s_token;
+	tmpItem->promenna = promenna;
+	tmpItem->next = list;
+	list = tmpItem;
 }
-void popPrc(int* s_token, string* promenna, PrcPtr list){
-	//todo
+int popPrc(int* s_token, char* promenna, PrcPtr list){	//navratova hodnota, jestli neni vstupni list NULL
+	if (list == NULL) return -1;
+	promenna = list->promenna;
+	*s_token = list->s_token;
+	PrcPtr tmp = list;
+	list = list->next;
+	free(tmp);
+	return 0;
 }
-void emptyPrc(PrcPtr list){
-	//todo todo todooo
+void emptyPrc(PrcPtr list){	//nejspise se nesmaze prvni, proverit
+	if (list->next == NULL){
+		return 0;
+	}
+	emptyPrc(list->next);
+	free(list->promenna);
+	free(list);
 }
 int topPrc(PrcPtr list){	//vraci hodnotu tokenu na topu listu
-	//tudududu
-	//jenom vrati hodnotu co je na topu, ale nepopuje ji, bude vyuzivat jen terminal list
+	if (list == NULL) return -1;
+	return list->s_token;
 }
 
 
-PrcPtr PSAlist;	//Zasobnik vsech ulozenych prvku (pushdown zasobnik)
-PrcPtr terminal_list;	//zasobik prvku, ktere jsou pro nas relevantni pro porovnavani posledniho znaku na zasobniku, (v prezentacich se za ne uklada "<")
+PrcPtr PSAlist = NULL;	//Zasobnik vsech ulozenych prvku (pushdown zasobnik)
+PrcPtr terminal_list = NULL;	//zasobik prvku, ktere jsou pro nas relevantni pro porovnavani posledniho znaku na zasobniku, (v prezentacich se za ne uklada "<")
 int vysl_prc = 0;		//zde se uklada navratova hodnota z tabulky
 int terminalTop = 13;	//hodnota/nazev terminalu na vrcholu zasobniku pro PSA
 int nacteny = 13;		//hodnota/nazev nacitaneho tokenu
