@@ -152,7 +152,8 @@ int getNextToken(string *attr){
     			}
     			else{
     				ungetc(c, source);
-    				return INT_V;} // token -> [INT_V, N]
+    				return INT_V;
+    			} // token -> [INT_V, N]
     		break;
     		case 6:
     			if (isdigit(c)){
@@ -169,9 +170,10 @@ int getNextToken(string *attr){
     				strAddChar(attr, c);
     				state = 8;
     			}
-    			else
+    			else{
     				ungetc(c, source);
     				return DOUBLE_V; // token -> [DOUBLE_V, D.D]
+    			}
     		break;
     		case 8:
     			if (isdigit(c)){
@@ -196,9 +198,10 @@ int getNextToken(string *attr){
     		case 10:
     			if (isdigit(c))
     				strAddChar(attr, c);
-    			else
+    			else{
     				ungetc(c, source);
     				return DOUBLE_V;
+    			}
     		break;
 
 			/***** ID OR KEYWORD *****/
@@ -273,14 +276,8 @@ int getNextToken(string *attr){
 					state = 21;
 			break;
 			case 23:
-				if (c == '\\')
-					state = 24;
-			break;
-			case 24:
-				if (c == 'n')
+				if (c == '\n')
 					state = 0;
-				else
-					state = 23;
 			break;
     	}
     }
