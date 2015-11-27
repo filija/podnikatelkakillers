@@ -6,6 +6,24 @@
 
 int main(int argc, char** argv)
 {
-  
+    FILE *f;
+   if (argc == 1)
+   {
+      printf("Neni zadan vstupni soubor\n");
+      return INTERNAL_ERR;
+   }
+   if ((f = fopen(argv[1], "r")) == NULL)
+   {
+      printf("Soubor se nepodarilo otevrit\n");
+      return INTERNAL_ERR;
+   }   
+   setSourceFile(f);
+
+   int result;
+   result = parse();
+
+   printf("Navrat: %i\n", result);
+
+   fclose(f);
    return 0;
 }

@@ -424,7 +424,6 @@ int parse(){
   else
      result = program();/*Zavolani kontoly syntaxe programu*/
   
-  
   /*Uvolneni retezcu*/
   strFree(&attr);
   /*if (str_parameters != NULL){	//co to ma byt za kod?
@@ -439,7 +438,6 @@ int parse(){
 int program(){
 	/*<PROGRAM>*/
 	int outcome;
-	
 	switch(token){
 		case INT:
 		case DOUBLE:

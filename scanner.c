@@ -150,9 +150,9 @@ int getNextToken(string *attr){
     				strAddChar(attr, c);
     				state = 8;
     			}
-    			else
+    			else{
     				ungetc(c, source);
-    				return INT_V; // token -> [INT_V, N]
+    				return INT_V;} // token -> [INT_V, N]
     		break;
     		case 6:
     			if (isdigit(c)){
@@ -207,25 +207,25 @@ int getNextToken(string *attr){
 					strAddChar(attr, c);
 				else{
 					ungetc(c, source);
-					if (strCmpConstStr(attr, "auto"))
+					if (!strCmpConstStr(attr, "auto"))
 						return AUTO;
-					else if (strCmpConstStr(attr, "cin"))
+					else if (!strCmpConstStr(attr, "cin"))
 						return CIN;
-					else if (strCmpConstStr(attr, "cout"))
+					else if (!strCmpConstStr(attr, "cout"))
 						return COUT;
-					else if (strCmpConstStr(attr, "double"))
+					else if (!strCmpConstStr(attr, "double"))
 						return DOUBLE;
-					else if (strCmpConstStr(attr, "else"))
+					else if (!strCmpConstStr(attr, "else"))
 						return ELSE;
-					else if (strCmpConstStr(attr, "for"))
+					else if (!strCmpConstStr(attr, "for"))
 						return FOR;
-					else if (strCmpConstStr(attr, "if"))
+					else if (!strCmpConstStr(attr, "if"))
 						return IF;
-					else if (strCmpConstStr(attr, "int"))
+					else if (!strCmpConstStr(attr, "int"))
 						return INT;
-					else if (strCmpConstStr(attr, "return"))
+					else if (!strCmpConstStr(attr, "return"))
 						return RETURN;
-					else if (strCmpConstStr(attr, "string"))
+					else if (!strCmpConstStr(attr, "string"))
 						return STRING;
 					else
 						return ID;
