@@ -9,6 +9,7 @@
 #include <string.h>
 #include <malloc.h>
 #include "define.h"
+#include "scanner.h"
 
 FILE *source;
 

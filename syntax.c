@@ -1,12 +1,5 @@
 #include "define.h"
-
-int prec_prevod(int* token, char* attrc);
-
-typedef struct listPrecedence {
-    struct listPrecedence *next;
-    int s_token;
-    char *promenna;
-} *PrcPtr;	//11.11.2015 19:15 prc by Korgo
+#include "syntax.h"
 
 //stringy uvnitr kopirovat pro ID, u ostatnich neni relevatni a muze byt string NULL
 int pushPrc(int s_token, char* promenna, PrcPtr list) {	//navratova hodnota funkce je jestli byla vnitrni chyba, nebo ne
