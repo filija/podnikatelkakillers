@@ -42,7 +42,7 @@ int strAddChar(string *s1, char c)
    {
       // pamet nestaci, je potreba provest realokaci
       if ((s1->str = (char*) realloc(s1->str, s1->length + STR_LEN_INC)) == NULL)
-         exit(99);
+         return 4; //zjistit jaka chyba!!
       s1->allocSize = s1->length + STR_LEN_INC;
    }
    s1->str[s1->length] = c;
@@ -59,7 +59,7 @@ int strCopyString(string *s1, string *s2)
    {
       // pamet nestaci, je potreba provest realokaci
       if ((s1->str = (char*) realloc(s1->str, newLength + 1)) == NULL)
-         exit(99);
+          return 4; //zjistit jaka chyba!!
       s1->allocSize = newLength + 1;
    }
    strcpy(s1->str, s2->str);

@@ -1,6 +1,20 @@
 #include "define.h"
 #include "syntax.h"
 
+
+void generateVariable(string *var)
+{
+  strClear(var);
+  strAddChar(var, '$');
+  int i;
+  i = counterVar;
+  while (i != 0)
+  {
+    strAddChar(var, (char)(i % 10 + '0'));
+    i = i / 10;
+  }
+  countVar ++;
+}
 //stringy uvnitr kopirovat pro ID, u ostatnich neni relevatni a muze byt string NULL
 int pushPrc(int s_token, char* promenna, PrcPtr list) {	//navratova hodnota funkce je jestli byla vnitrni chyba, nebo ne
 	PrcPtr tmpItem;

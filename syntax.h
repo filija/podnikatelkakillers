@@ -1,10 +1,12 @@
+#include "str.h"
+
 typedef struct listPrecedence {
     struct listPrecedence *next;
     int s_token;
     char *promenna;
 } *PrcPtr;
 
-
+void generateVariable(string *var);
 int pushPrc(int s_token, char* promenna, PrcPtr list);
 int popPrc(int* s_token, char* promenna, PrcPtr list);
 void emptyPrc(PrcPtr list);

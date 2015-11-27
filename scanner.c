@@ -10,7 +10,6 @@
 #include <malloc.h>
 #include "define.h"
 #include "scanner.h"
-#include "str.h"
 
 FILE *source;
 
@@ -90,7 +89,7 @@ int getNextToken(string *attr){
 								return PS_ZAVORKA;
 							break;
 							case EOF:
-								return EOF;
+								return FILEEND;
 							break;
 							default:
 								lErr();

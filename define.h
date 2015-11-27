@@ -37,7 +37,7 @@
 #define STRING 			32
 #define MAIN			33
 
-#define EOF				34
+#define FILEEND			34
 
 #define DOLAR			35
 
@@ -55,6 +55,6 @@
 #define IS_OK			0 // all okey
 
 #define SHIFT			1 // shift
-#define RPLCE			2 // replace
-#define HANDL			3 // handle
+#define RPLCE			2 // shift
+#define HADLE			3 // handle
 #define SHERR 			4 // chyba v precedencce
