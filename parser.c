@@ -40,49 +40,49 @@ string *params;
    return result;
 }*/
 
-void generateVariable(char *var)
+void generateVariable(char **var)
 {
-  if ((var = (char*) malloc(sizeof(char)*15)) == NULL) return;
-  memset(var,0,15);
-  sprintf (var, "$%d", countVar);
+  if ((*var = (char*) malloc(sizeof(char)*15)) == NULL) return;
+  memset(*var,0,15);
+  sprintf (*var, "$%d", countVar);
   countVar ++;
 }
 //stringy uvnitr kopirovat pro ID, u ostatnich neni relevatni a muze byt string NULL
-int pushPrc(int s_token, char* promenna, PrcPtr list) {	//navratova hodnota funkce je jestli byla vnitrni chyba, nebo ne
+int pushPrc(int s_token, char* promenna, PrcPtr *list) {	//navratova hodnota funkce je jestli byla vnitrni chyba, nebo ne
 	PrcPtr tmpItem;
 	if ( (tmpItem = malloc(sizeof(struct listPrecedence))) == NULL )return INTERNAL_ERR;
 	tmpItem->s_token = s_token;
 	tmpItem->promenna = promenna;
-	tmpItem->next = list;
-	list = tmpItem;
+	tmpItem->next = *list;
+	*list = tmpItem;
 	return 0;
 }
-int popPrc(int* s_token, char* promenna, PrcPtr list){	//navratova hodnota, jestli neni vstupni list NULL
+int popPrc(int* s_token, char* promenna, PrcPtr *list){	//navratova hodnota, jestli neni vstupni list NULL
 	if (list == NULL) return -1;
-	promenna = list->promenna;
-	*s_token = list->s_token;
-	PrcPtr tmp = list;
-	list = list->next;
+	promenna = (*list)->promenna;
+	*s_token = (*list)->s_token;
+	PrcPtr tmp = *list;
+	*list = (*list)->next;
 	free(tmp);
 	return 0;
 }
-void emptyPrc(PrcPtr list){	//nejspise se nesmaze prvni, proverit
-	if (list == NULL){
+void emptyPrc(PrcPtr *list){	//nejspise se nesmaze prvni, proverit
+	if (*list == NULL){
 		return;
 	}
-	emptyPrc(list->next);
-	free(list->promenna);
-	free(list);
+	emptyPrc(&((*list)->next));
+	free((*list)->promenna);
+	free(*list);
 }
 int topPrc(PrcPtr list){	//vraci hodnotu adresace do tabulky z terminal_listu
 	if (list == NULL) return -1;
 	return list->s_token;
 }
 
-int poptPrc(PrcPtr list){
-	if (list == NULL) return -1;
-	PrcPtr tmp = list;
-	list = list->next;
+int poptPrc(PrcPtr *list){
+	if (*list == NULL) return -1;
+	PrcPtr tmp = *list;
+	*list = (*list)->next;
 	free(tmp);
 	return 0;
 }
@@ -108,7 +108,7 @@ int Table[14][14] =
 
 };
 
-int syntax_precedencka(){
+int syntax_precedencka(){ //prejmenovat magicke promenne, na promenne v define, nekontroluje jestli prebyva leva zavorka, to taky osetrit
 int tok1;
 int tok2;
 int tok3;
@@ -125,214 +125,215 @@ int nacteny = 13;		//hodnota/nazev nacitaneho tokenu
 //pak dodelat vsude error handling
 //token prijde od LL, vzdy se dalsi token nacita po jeho zpracovani, ne pred nim!
 //push na teminallist DOLAR
-pushPrc(13, NULL, terminal_list);
-string_from_char(attrc, &attr);
-nacteny = prec_prevod(&token, attrc);	//zase otazka jestli se ma pouzit dereference, nebo attr sam o sbe je ukazatel, pak se podivat a poresit na vsech mistech
+pushPrc(13, NULL, &terminal_list);
+string_from_char(&attrc, &attr);
+nacteny = prec_prevod(&token, &attrc);	//zase otazka jestli se ma pouzit dereference, nebo attr sam o sbe je ukazatel, pak se podivat a poresit na vsech mistech
 do{
 	vysl_prc = Table[terminalTop][nacteny];
 	switch (vysl_prc){
 		case SHIFT:
-			pushPrc(token, attrc, PSAlist);
-			pushPrc(nacteny, attrc, terminal_list);
+			pushPrc(token, attrc, &PSAlist);
+			pushPrc(nacteny, attrc, &terminal_list);
 			getToken;
-			string_from_char(attrc, &attr);
-			nacteny = prec_prevod(&token, attrc);
+			string_from_char(&attrc, &attr);
+			nacteny = prec_prevod(&token, &attrc);
 			break;
 		case HADLE:
-			poptPrc(terminal_list);
-			popPrc(&tok1, atr1, PSAlist);
-			popPrc(&tok2, atr2, PSAlist);
+			poptPrc(&terminal_list);
+			popPrc(&tok1, atr1, &PSAlist);
+			popPrc(&tok2, atr2, &PSAlist);
 			if(tok1 != ID) return SYN_ERR; //nejaka chyba
 			if(tok2 != L_ZAVORKA) return SYN_ERR;
-			pushPrc(tok1, atr1, PSAlist);
+			//printf("nemeloby se vykonat\n");
+			pushPrc(tok1, atr1, &PSAlist);
 			free(atr2);
 			//vytahnout levou zavorku z terminal_list (pop(terminallist))
 			//2x pop a nekam si ulozit hodnoty z PSAlist
 			//zkontrolovat jestli odpovida tvar: "(ID)", pokud ne vratit spravny error
 			//pokud tvar odpovida, pushnout ID na PSAlist
 			getToken;
-			string_from_char(attrc, &attr);
-			nacteny = prec_prevod(&token, attrc);			
+			string_from_char(&attrc, &attr);
+			nacteny = prec_prevod(&token, &attrc);			
 			break;
 		case RPLCE:
 			switch(terminalTop){
-				case ID:
-					poptPrc(terminal_list);
+				case S_ID:
+					poptPrc(&terminal_list);
 					//pop terminal list, nic vic. Pro nas je to jak kdyby prevod ID -> E
 					break;
-				case PLUS:
-					poptPrc(terminal_list);
-					popPrc(&tok1, atr1, PSAlist);
-					popPrc(&tok2, atr2, PSAlist);
-					popPrc(&tok3, atr3, PSAlist);
+				case S_PLUS:
+					poptPrc(&terminal_list);
+					popPrc(&tok1, atr1, &PSAlist);
+					popPrc(&tok2, atr2, &PSAlist);
+					popPrc(&tok3, atr3, &PSAlist);
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != PLUS) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-
+					//pozor na kratke vyrazy! je tam pristup do nepridelene pameti!!
 					// pop(terminallist) -> zpracovali jsme terminal na topu
 					// 3x pop PSAlist a kazdy pop si ulozit, nezapomenout ze se to popuje od zadu!!! a-b vs b-a
 					// zkotrolovat jestli odpovida tvar ID + ID, pokud ne vyhodit error (napr mohlo by prijit + ID +, v pripade ze by se redukce provedla pred zadanim promenne)
 					// pokud vse odpovida:
 					// vygenerovat promennou do ktere se ulozi vysledek
 					free(atr2);	//recyklujeme promenne, tuto informaci nepotrebujeme
-					generateVariable(atr2);
+					generateVariable(&atr2);
 					//nacpat promennou do lokalni tabulky
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
 					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
-					pushPrc(ID, atr2, PSAlist);
+					pushPrc(ID, atr2, &PSAlist);
 					break;
-				case MINUS:
-					poptPrc(terminal_list);
-					popPrc(&tok1, atr1, PSAlist);
-					popPrc(&tok2, atr2, PSAlist);
-					popPrc(&tok3, atr3, PSAlist);
+				case S_MINUS:
+					poptPrc(&terminal_list);
+					popPrc(&tok1, atr1, &PSAlist);
+					popPrc(&tok2, atr2, &PSAlist);
+					popPrc(&tok3, atr3, &PSAlist);
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != MINUS) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
 					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
 					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
 					free(atr2);	//recyklujeme promenne, tuto informaci nepotrebujeme
-					generateVariable(atr2);
+					generateVariable(&atr2);
 					//nacpat promennou do lokalni tabulky
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
 					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
-					pushPrc(ID, atr2, PSAlist);
+					pushPrc(ID, atr2, &PSAlist);
 					break;
-				case NASOBENI:
-					poptPrc(terminal_list);
-					popPrc(&tok1, atr1, PSAlist);
-					popPrc(&tok2, atr2, PSAlist);
-					popPrc(&tok3, atr3, PSAlist);
+				case S_NASOBENI:
+					poptPrc(&terminal_list);
+					popPrc(&tok1, atr1, &PSAlist);
+					popPrc(&tok2, atr2, &PSAlist);
+					popPrc(&tok3, atr3, &PSAlist);
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != NASOBENI) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
 					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
 					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
 					free(atr2);	//recyklujeme promenne, tuto informaci nepotrebujeme
-					generateVariable(atr2);
+					generateVariable(&atr2);
 					//nacpat promennou do lokalni tabulky
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
 					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
-					pushPrc(ID, atr2, PSAlist);
+					pushPrc(ID, atr2, &PSAlist);
 					break;
-				case DELENI:
-					poptPrc(terminal_list);
-					popPrc(&tok1, atr1, PSAlist);
-					popPrc(&tok2, atr2, PSAlist);
-					popPrc(&tok3, atr3, PSAlist);
+				case S_DELENI:
+					poptPrc(&terminal_list);
+					popPrc(&tok1, atr1, &PSAlist);
+					popPrc(&tok2, atr2, &PSAlist);
+					popPrc(&tok3, atr3, &PSAlist);
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != DELENI) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
 					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
 					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
 					free(atr2);	//recyklujeme promenne, tuto informaci nepotrebujeme
-					generateVariable(atr2);
+					generateVariable(&atr2);
 					//nacpat promennou do lokalni tabulky
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
 					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
-					pushPrc(ID, atr2, PSAlist);
+					pushPrc(ID, atr2, &PSAlist);
 					break;
-				case ROVNA_SE:
-					poptPrc(terminal_list);
-					popPrc(&tok1, atr1, PSAlist);
-					popPrc(&tok2, atr2, PSAlist);
-					popPrc(&tok3, atr3, PSAlist);
+				case S_ROVNA_SE:
+					poptPrc(&terminal_list);
+					popPrc(&tok1, atr1, &PSAlist);
+					popPrc(&tok2, atr2, &PSAlist);
+					popPrc(&tok3, atr3, &PSAlist);
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != ROVNA_SE) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
 					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
 					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
 					free(atr2);	//recyklujeme promenne, tuto informaci nepotrebujeme
-					generateVariable(atr2);
+					generateVariable(&atr2);
 					//nacpat promennou do lokalni tabulky
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
 					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
-					pushPrc(ID, atr2, PSAlist);
+					pushPrc(ID, atr2, &PSAlist);
 					break;
-				case MENE_NEBO_ROVNO:
-					poptPrc(terminal_list);
-					popPrc(&tok1, atr1, PSAlist);
-					popPrc(&tok2, atr2, PSAlist);
-					popPrc(&tok3, atr3, PSAlist);
+				case S_MENE_NEBO_ROVNO:
+					poptPrc(&terminal_list);
+					popPrc(&tok1, atr1, &PSAlist);
+					popPrc(&tok2, atr2, &PSAlist);
+					popPrc(&tok3, atr3, &PSAlist);
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != MENE_NEBO_ROVNO) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
 					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
 					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
 					free(atr2);	//recyklujeme promenne, tuto informaci nepotrebujeme
-					generateVariable(atr2);
+					generateVariable(&atr2);
 					//nacpat promennou do lokalni tabulky
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
 					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
-					pushPrc(ID, atr2, PSAlist);
+					pushPrc(ID, atr2, &PSAlist);
 					break;
-				case MENE:
-					poptPrc(terminal_list);
-					popPrc(&tok1, atr1, PSAlist);
-					popPrc(&tok2, atr2, PSAlist);
-					popPrc(&tok3, atr3, PSAlist);
+				case S_MENE:
+					poptPrc(&terminal_list);
+					popPrc(&tok1, atr1, &PSAlist);
+					popPrc(&tok2, atr2, &PSAlist);
+					popPrc(&tok3, atr3, &PSAlist);
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != MENE) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
 					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
 					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
 					free(atr2);	//recyklujeme promenne, tuto informaci nepotrebujeme
-					generateVariable(atr2);
+					generateVariable(&atr2);
 					//nacpat promennou do lokalni tabulky
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
 					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
-					pushPrc(ID, atr2, PSAlist);
+					pushPrc(ID, atr2, &PSAlist);
 					break;
-				case NEROVNOST:
-					poptPrc(terminal_list);
-					popPrc(&tok1, atr1, PSAlist);
-					popPrc(&tok2, atr2, PSAlist);
-					popPrc(&tok3, atr3, PSAlist);
+				case S_NEROVNOST:
+					poptPrc(&terminal_list);
+					popPrc(&tok1, atr1, &PSAlist);
+					popPrc(&tok2, atr2, &PSAlist);
+					popPrc(&tok3, atr3, &PSAlist);
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != NEROVNOST) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
 					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
 					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
 					free(atr2);	//recyklujeme promenne, tuto informaci nepotrebujeme
-					generateVariable(atr2);
+					generateVariable(&atr2);
 					//nacpat promennou do lokalni tabulky
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
 					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
-					pushPrc(ID, atr2, PSAlist);
+					pushPrc(ID, atr2, &PSAlist);
 					break;
-				case VICE_NEBO_ROVNO:
-					poptPrc(terminal_list);
-					popPrc(&tok1, atr1, PSAlist);
-					popPrc(&tok2, atr2, PSAlist);
-					popPrc(&tok3, atr3, PSAlist);
+				case S_VICE_NEBO_ROVNO:
+					poptPrc(&terminal_list);
+					popPrc(&tok1, atr1, &PSAlist);
+					popPrc(&tok2, atr2, &PSAlist);
+					popPrc(&tok3, atr3, &PSAlist);
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != VICE_NEBO_ROVNO) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
 					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
 					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
 					free(atr2);	//recyklujeme promenne, tuto informaci nepotrebujeme
-					generateVariable(atr2);
+					generateVariable(&atr2);
 					//nacpat promennou do lokalni tabulky
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
 					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
-					pushPrc(ID, atr2, PSAlist);
+					pushPrc(ID, atr2, &PSAlist);
 					break;
-				case VICE:
-					poptPrc(terminal_list);
-					popPrc(&tok1, atr1, PSAlist);
-					popPrc(&tok2, atr2, PSAlist);
-					popPrc(&tok3, atr3, PSAlist);
+				case S_VICE:
+					poptPrc(&terminal_list);
+					popPrc(&tok1, atr1, &PSAlist);
+					popPrc(&tok2, atr2, &PSAlist);
+					popPrc(&tok3, atr3, &PSAlist);
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != VICE) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
 					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
 					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
 					free(atr2);	//recyklujeme promenne, tuto informaci nepotrebujeme
-					generateVariable(atr2);
+					generateVariable(&atr2);
 					//nacpat promennou do lokalni tabulky
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
 					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
-					pushPrc(ID, atr2, PSAlist);
+					pushPrc(ID, atr2, &PSAlist);
 					break;
 				default:
 					//stdout ze tady by to nikdy dojit nemelo a najit v jakem pripade se to stalo :)
@@ -344,14 +345,14 @@ do{
 	}
 
 	terminalTop = topPrc(terminal_list);
-}while (nacteny != DOLAR || terminalTop != DOLAR);
-return 0;
+}while (nacteny != 13 || terminalTop != 13);
+return IS_OK;
 //navrat hodnoty na pop(PSAlist), tam bude ta promenna ve ktere je ulozeny vysledek vyrazu
 //konec PSA
 }
 
 
-int prec_prevod(int* token, char* attrc){ //ma to byt ukazatel, nebo string sam o sobe je ukazatel na strukturu?
+int prec_prevod(int* token, char** attrc){ //ma to byt ukazatel, nebo string sam o sobe je ukazatel na strukturu?
 	switch(*token){
 		case INT_V:
 			//attr se prevede na int hodnotu
@@ -423,7 +424,6 @@ int parse(){
      result = LEX_ERR;
   else
      result = program();/*Zavolani kontoly syntaxe programu*/
-  
   /*Uvolneni retezcu*/
   strFree(&attr);
   /*if (str_parameters != NULL){	//co to ma byt za kod?
@@ -718,6 +718,8 @@ int prikaz(){
 			if (token != L_ZAVORKA) return SYN_ERR;
 			getToken
 			// expr
+			outcome = syntax_precedencka();
+			if (outcome != IS_OK) return outcome;
 			// expr dava nacteny dalsi token
 			if (token != P_ZAVORKA) return SYN_ERR;
 			getToken
@@ -739,6 +741,8 @@ int prikaz(){
 			if (token != STREDNIK) return SYN_ERR;
 			getToken
 			// expr
+			outcome = syntax_precedencka();
+			if (outcome != IS_OK) return outcome;
 			// expr dava nacteny dalsi token
 			if (token != STREDNIK) return SYN_ERR;
 			getToken
@@ -747,6 +751,8 @@ int prikaz(){
 			if (token != PRIRAZENI) return SYN_ERR;
 			getToken
 			// expr
+			outcome = syntax_precedencka();
+			if (outcome != IS_OK) return outcome;
 			// expr dava nacteny dalsi token
 			if (token != P_ZAVORKA) return SYN_ERR;
 			getToken
@@ -758,6 +764,8 @@ int prikaz(){
 		case RETURN:
 			getToken
 			// expr
+			outcome = syntax_precedencka();
+			if (outcome != IS_OK) return outcome;
 			// expr dava nacteny dalsi token
 			if (token != STREDNIK) return SYN_ERR;
 			getToken
@@ -787,7 +795,7 @@ int prikaz(){
 	}
 }
 
-int prirazeni(){
+int prirazeni(){	//case ID and id je jmeno funkce... na tomto nam bude padat kontrola
 	int outcome;
 	switch(token){
 		/* PRIRAZENI → id lz TERMY pz */
@@ -803,7 +811,9 @@ int prirazeni(){
 			break;
 		// case expresiion <<< PRIRAZENI → expr
 		default:
-			return SYN_ERR;
+			outcome = syntax_precedencka();
+			if (outcome != IS_OK) return outcome;
+			return IS_OK;
 			break;
 	}
 }
@@ -903,6 +913,8 @@ int promenna(){
 			if (token != PRIRAZENI) return SYN_ERR;
 			getToken
 			//expression 
+			outcome = syntax_precedencka();
+			if (outcome != IS_OK) return outcome;
 			return IS_OK;
 			break;
 		default:
@@ -912,11 +924,14 @@ int promenna(){
 }
 
 int prirad(){
+	int outcome;
 	switch(token){
 		case PRIRAZENI:
 		/* PRIRAD → rovnitko expr */	
 			getToken
 			//expr
+			outcome = syntax_precedencka();
+			if (outcome != IS_OK) return outcome;
 			return IS_OK;
 			break;
 		case STREDNIK:

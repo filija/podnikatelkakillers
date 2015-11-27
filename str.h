@@ -21,6 +21,6 @@ int strCmpConstStr(string *s1, char *s2);
 
 char *strGetStr(string *s);
 int strGetLength(string *s);
-void string_from_char(char *ch, string *s);
+void string_from_char(char **ch, string *s);
 
 #endif /* GRANDFATHER_H */

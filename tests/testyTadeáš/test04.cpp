@@ -1,28 +1,28 @@
-int soucet(b)
+int soucet(int b)
 {
 	int vysl;
-	vysl = b + b;
+	vysl = 1 + b;
 	return vysl;
 }
 
-int rozdil(b)
+int rozdil(int b)
 {
 	int vysl;
-	vysl = b - b;
+	vysl = 2 - b;
 	return vysl;
 }
 
-int nasobeni(b)
+int nasobeni(int b)
 {
 	int vysl;
-	vysl = b * b;
+	vysl = 3 * b;
 	return vysl;
 }
 
-int deleni(b)
+int deleni(int b)
 {
 	int vysl;
-	vysl = b / b;
+	vysl = 4 / b;
 	return vysl;
 }
 

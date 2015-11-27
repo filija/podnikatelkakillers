@@ -92,7 +92,7 @@ int strGetLength(string *s)
    return s->length;
 }
 
-void string_from_char(char *ch, string *s){
- 	ch = malloc((sizeof(char))*(s->length));
-	memcpy(ch,s->str, s->length);
+void string_from_char(char **ch, string *s){
+ 	*ch = malloc((sizeof(char))*(s->length));
+	memcpy(*ch,s->str, s->length);
 }

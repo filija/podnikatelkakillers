@@ -39,8 +39,6 @@
 
 #define FILEEND			34
 
-#define DOLAR			35
-
 #define LEX_ERR			-1
 #define SYN_ERR			-2
 #define SEM_ERR			-3
@@ -58,3 +56,18 @@
 #define RPLCE			2 // shift
 #define HADLE			3 // handle
 #define SHERR 			4 // chyba v precedencce
+
+#define S_ID			0
+#define S_L_ZAVORKA		1
+#define S_P_ZAVORKA		2
+#define S_PLUS			3
+#define S_MINUS			4
+#define S_NASOBENI		5
+#define S_DELENI		6
+#define S_ROVNA_SE		7
+#define S_MENE_NEBO_ROVNO	8
+#define S_MENE 			9
+#define S_NEROVNOST		10
+#define S_VICE_NEBO_ROVNO	11
+#define S_VICE 			12
+#define S_DOLAR			13

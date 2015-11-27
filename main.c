@@ -18,12 +18,10 @@ int main(int argc, char** argv)
       return INTERNAL_ERR;
    }   
    setSourceFile(f);
-
    int result;
    result = parse();
-
-   printf("Navrat: %i\n", result);
-
+   printf("result: %i\n", result);
    fclose(f);
+   if (result) return -result;
    return 0;
 }
