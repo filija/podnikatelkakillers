@@ -20,6 +20,7 @@ int main(int argc, char** argv)
    setSourceFile(f);
    int result;
    result = parse();
+   printf("Result: %i\n", result);
    fclose(f);
    if (result) return -result;
    return 0;

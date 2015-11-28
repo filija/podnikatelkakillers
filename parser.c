@@ -57,8 +57,8 @@ int pushPrc(int s_token, char* promenna, PrcPtr *list) {	//navratova hodnota fun
 	*list = tmpItem;
 	return 0;
 }
-int popPrc(int* s_token, char* promenna, PrcPtr *list){	//navratova hodnota, jestli neni vstupni list NULL
-	if (list == NULL) return -1;
+int popPrc (int* s_token, char* promenna, PrcPtr *list){	//navratova hodnota, jestli neni vstupni list NULL
+	if (*list == NULL) return -1;
 	promenna = (*list)->promenna;
 	*s_token = (*list)->s_token;
 	PrcPtr tmp = *list;
@@ -140,8 +140,8 @@ do{
 			break;
 		case HADLE:
 			poptPrc(&terminal_list);
-			popPrc(&tok1, atr1, &PSAlist);
-			popPrc(&tok2, atr2, &PSAlist);
+			if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
+			if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
 			if(tok1 != ID) return SYN_ERR; //nejaka chyba
 			if(tok2 != L_ZAVORKA) return SYN_ERR;
 			pushPrc(tok1, atr1, &PSAlist);
@@ -162,13 +162,12 @@ do{
 					break;
 				case S_PLUS:
 					poptPrc(&terminal_list);
-					popPrc(&tok1, atr1, &PSAlist);
-					popPrc(&tok2, atr2, &PSAlist);
-					popPrc(&tok3, atr3, &PSAlist);
+					if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok3, atr3, &PSAlist)) return SYN_ERR;
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != PLUS) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-					//pozor na kratke vyrazy! je tam pristup do nepridelene pameti!!
 					// pop(terminallist) -> zpracovali jsme terminal na topu
 					// 3x pop PSAlist a kazdy pop si ulozit, nezapomenout ze se to popuje od zadu!!! a-b vs b-a
 					// zkotrolovat jestli odpovida tvar ID + ID, pokud ne vyhodit error (napr mohlo by prijit + ID +, v pripade ze by se redukce provedla pred zadanim promenne)
@@ -183,9 +182,9 @@ do{
 					break;
 				case S_MINUS:
 					poptPrc(&terminal_list);
-					popPrc(&tok1, atr1, &PSAlist);
-					popPrc(&tok2, atr2, &PSAlist);
-					popPrc(&tok3, atr3, &PSAlist);
+					if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok3, atr3, &PSAlist)) return SYN_ERR;
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != MINUS) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
@@ -200,9 +199,9 @@ do{
 					break;
 				case S_NASOBENI:
 					poptPrc(&terminal_list);
-					popPrc(&tok1, atr1, &PSAlist);
-					popPrc(&tok2, atr2, &PSAlist);
-					popPrc(&tok3, atr3, &PSAlist);
+					if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok3, atr3, &PSAlist)) return SYN_ERR;
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != NASOBENI) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
@@ -217,9 +216,9 @@ do{
 					break;
 				case S_DELENI:
 					poptPrc(&terminal_list);
-					popPrc(&tok1, atr1, &PSAlist);
-					popPrc(&tok2, atr2, &PSAlist);
-					popPrc(&tok3, atr3, &PSAlist);
+					if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok3, atr3, &PSAlist)) return SYN_ERR;
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != DELENI) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
@@ -234,9 +233,9 @@ do{
 					break;
 				case S_ROVNA_SE:
 					poptPrc(&terminal_list);
-					popPrc(&tok1, atr1, &PSAlist);
-					popPrc(&tok2, atr2, &PSAlist);
-					popPrc(&tok3, atr3, &PSAlist);
+					if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok3, atr3, &PSAlist)) return SYN_ERR;
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != ROVNA_SE) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
@@ -251,9 +250,9 @@ do{
 					break;
 				case S_MENE_NEBO_ROVNO:
 					poptPrc(&terminal_list);
-					popPrc(&tok1, atr1, &PSAlist);
-					popPrc(&tok2, atr2, &PSAlist);
-					popPrc(&tok3, atr3, &PSAlist);
+					if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok3, atr3, &PSAlist)) return SYN_ERR;
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != MENE_NEBO_ROVNO) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
@@ -268,9 +267,9 @@ do{
 					break;
 				case S_MENE:
 					poptPrc(&terminal_list);
-					popPrc(&tok1, atr1, &PSAlist);
-					popPrc(&tok2, atr2, &PSAlist);
-					popPrc(&tok3, atr3, &PSAlist);
+					if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok3, atr3, &PSAlist)) return SYN_ERR;
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != MENE) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
@@ -285,9 +284,9 @@ do{
 					break;
 				case S_NEROVNOST:
 					poptPrc(&terminal_list);
-					popPrc(&tok1, atr1, &PSAlist);
-					popPrc(&tok2, atr2, &PSAlist);
-					popPrc(&tok3, atr3, &PSAlist);
+					if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok3, atr3, &PSAlist)) return SYN_ERR;
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != NEROVNOST) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
@@ -302,9 +301,9 @@ do{
 					break;
 				case S_VICE_NEBO_ROVNO:
 					poptPrc(&terminal_list);
-					popPrc(&tok1, atr1, &PSAlist);
-					popPrc(&tok2, atr2, &PSAlist);
-					popPrc(&tok3, atr3, &PSAlist);
+					if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok3, atr3, &PSAlist)) return SYN_ERR;
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != VICE_NEBO_ROVNO) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
@@ -319,9 +318,9 @@ do{
 					break;
 				case S_VICE:
 					poptPrc(&terminal_list);
-					popPrc(&tok1, atr1, &PSAlist);
-					popPrc(&tok2, atr2, &PSAlist);
-					popPrc(&tok3, atr3, &PSAlist);
+					if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok3, atr3, &PSAlist)) return SYN_ERR;
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != VICE) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
@@ -340,6 +339,7 @@ do{
 			}
 			break;
 		case SHERR:
+			if (terminalTop == S_L_ZAVORKA) return SYN_ERR;
 			nacteny = S_DOLAR;
 	}
 
