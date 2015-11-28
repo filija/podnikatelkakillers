@@ -6,7 +6,7 @@ int main()
 	cin >> a;
 	if (a==0)
 	{
-		cout << "Nesmi se dělit nulou"
+		cout << "Nesmi se dělit nulou";
 	}
 	else
 	{

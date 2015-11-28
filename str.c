@@ -48,7 +48,7 @@ int strAddChar(string *s1, char c)
    s1->str[s1->length] = c;
    s1->length++;
    s1->str[s1->length] = '\0';
-   printf("test print %s\n", s1->str);
+//   printf("test print %s\n", s1->str);
    return STR_SUCCESS;
 }
 

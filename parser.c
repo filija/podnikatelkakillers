@@ -119,13 +119,13 @@ char* atr3 = NULL;
 PrcPtr PSAlist = NULL;	//Zasobnik vsech ulozenych prvku (pushdown zasobnik)
 PrcPtr terminal_list = NULL;	//zasobik prvku, ktere jsou pro nas relevantni pro porovnavani posledniho znaku na zasobniku, (v prezentacich se za ne uklada "<")
 int vysl_prc = 0;		//zde se uklada navratova hodnota z tabulky
-int terminalTop = 13;	//hodnota/nazev terminalu na vrcholu zasobniku pro PSA
-int nacteny = 13;		//hodnota/nazev nacitaneho tokenu
+int terminalTop = S_DOLAR;	//hodnota/nazev terminalu na vrcholu zasobniku pro PSA
+int nacteny = S_DOLAR;		//hodnota/nazev nacitaneho tokenu
 //samotny kod PSA (precedencni SA)
 //pak dodelat vsude error handling
 //token prijde od LL, vzdy se dalsi token nacita po jeho zpracovani, ne pred nim!
 //push na teminallist DOLAR
-pushPrc(13, NULL, &terminal_list);
+pushPrc(S_DOLAR, NULL, &terminal_list);
 string_from_char(&attrc, &attr);
 nacteny = prec_prevod(&token, &attrc);	//zase otazka jestli se ma pouzit dereference, nebo attr sam o sbe je ukazatel, pak se podivat a poresit na vsech mistech
 do{
@@ -144,7 +144,6 @@ do{
 			popPrc(&tok2, atr2, &PSAlist);
 			if(tok1 != ID) return SYN_ERR; //nejaka chyba
 			if(tok2 != L_ZAVORKA) return SYN_ERR;
-			//printf("nemeloby se vykonat\n");
 			pushPrc(tok1, atr1, &PSAlist);
 			free(atr2);
 			//vytahnout levou zavorku z terminal_list (pop(terminallist))
@@ -341,11 +340,11 @@ do{
 			}
 			break;
 		case SHERR:
-			nacteny = 13;
+			nacteny = S_DOLAR;
 	}
 
 	terminalTop = topPrc(terminal_list);
-}while (nacteny != 13 || terminalTop != 13);
+}while (nacteny != S_DOLAR || terminalTop != S_DOLAR);
 return IS_OK;
 //navrat hodnoty na pop(PSAlist), tam bude ta promenna ve ktere je ulozeny vysledek vyrazu
 //konec PSA
@@ -361,7 +360,7 @@ int prec_prevod(int* token, char** attrc){ //ma to byt ukazatel, nebo string sam
 			generateVariable(attrc);		
 			//zmeni se hodnota tokenu na ID
 			*token = ID;
-			return 0;
+			return S_ID;
 		case DOUBLE_V:
 			//attr se prevede na double hodnotu
 			//hodnota se ulozi s unikatnim identifikatorem do lokalni tabulky
@@ -369,7 +368,7 @@ int prec_prevod(int* token, char** attrc){ //ma to byt ukazatel, nebo string sam
 			generateVariable(attrc);
 			//zmeni se hodnota tokenu na ID
 			*token = ID;
-			return 0;
+			return S_ID;
 		case STRING_V:
 			//attr se zkopiruje na novy oddil pameti (kdyby se zkopirval ukazatel, tak po zmene attr, by jsme ztratili "hodnotu")
 			//hodnota se ulozi s unikatnim identifikatorem do lokalni tabulky
@@ -377,35 +376,35 @@ int prec_prevod(int* token, char** attrc){ //ma to byt ukazatel, nebo string sam
 			generateVariable(attrc);
 			//zmeni se hodnota tokenu na ID
 			*token = ID;
-			return 0;
+			return S_ID;
 		case ID:
-			return 0;
+			return S_ID;
 		case L_ZAVORKA:
-			return 1;
+			return S_L_ZAVORKA;
 		case P_ZAVORKA:
-			return 2;
+			return S_P_ZAVORKA;
 		case PLUS:
-			return 3;
+			return S_PLUS;
 		case MINUS:
-			return 4;
+			return S_MINUS;
 		case NASOBENI:
-			return 5;
+			return S_NASOBENI;
 		case DELENI:
-			return 6;
+			return S_DELENI;
 		case ROVNA_SE:
-			return 7;
+			return S_ROVNA_SE;
 		case MENE_NEBO_ROVNO:
-			return 8;
+			return S_MENE_NEBO_ROVNO;
 		case MENE:
-			return 9;
+			return S_MENE;
 		case NEROVNOST:
-			return 10;
+			return S_NEROVNOST;
 		case VICE_NEBO_ROVNO:
-			return 11;
+			return S_VICE_NEBO_ROVNO;
 		case VICE:
-			return 12;
+			return S_VICE;
 		default:	//dolar
-			return 13;
+			return S_DOLAR;
 	}
 }
 
