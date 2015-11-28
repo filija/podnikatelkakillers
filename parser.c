@@ -91,7 +91,7 @@ int Table[14][14] =
 // sloupec - vstupni token, radek - znak na zasobniku, tabulka jeste neni opravena!!
 { 
 //		   ID 	  (		  )       +        -      *       /       ==      <=       <      !=      >=      >       $
-/*ID*/	{RPLCE,	SHERR,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE},
+/*ID*/	{SHERR,	SHERR,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE},
 /*(*/	{SHIFT,	SHIFT,	HADLE,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHIFT,	SHERR},
 /*)*/	{SHERR,	SHERR,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE},
 /*+*/	{SHIFT,	SHIFT,	RPLCE,	RPLCE,	RPLCE,	SHIFT,	SHIFT,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE},
@@ -152,6 +152,7 @@ do{
 			//pokud tvar odpovida, pushnout ID na PSAlist
 			getToken;
 			string_from_char(&attrc, &attr);
+			pushPrc(S_ID, NULL, &terminal_list);
 			nacteny = prec_prevod(&token, &attrc);			
 			break;
 		case RPLCE:
@@ -334,6 +335,7 @@ do{
 					pushPrc(ID, atr2, &PSAlist);
 					break;
 				default:
+					printf("Toto by se nemelo stat. nhlasit!\n");
 					//stdout ze tady by to nikdy dojit nemelo a najit v jakem pripade se to stalo :)
 					break;
 			}
