@@ -8,20 +8,20 @@
 #include "parser.h"
 #include "define.h"
 //#include "syntax.h"
-//#include "tabulka_symbolu.h"
+#include "tabulka_symbolu.h"
 
 #define getToken if ((token = getNextToken(&attr)) == LEX_ERR){return LEX_ERR;}
 
 int token;
 int countVar = 0;
-//struct symbol_table *table;
-//struct symbol_table *glob_table;
+uk_uzel table;
+uk_uzel glob_table;
 // ptrStack stack;
 string attr;
 char *attrc;
 string *params;
 //tSymbolPtr hledane_id;
-//tSymbolPtr data; // data prubezna
+tSymbolPtr data; // data prubezna
 
 //tList *List; // list instrukci
 
@@ -88,7 +88,7 @@ int poptPrc(PrcPtr *list){
 }
 
 int Table[14][14] =
-// sloupec - vstupni token, radek - znak na zasobniku, tabulka jeste neni opravena!!
+// sloupec - vstupni token, radek - znak na zasobniku, tabulka jeste neni opravena? Nezda se mi uvolnovani pameti!
 { 
 //		   ID 	  (		  )       +        -      *       /       ==      <=       <      !=      >=      >       $
 /*ID*/	{SHERR,	SHERR,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE,	RPLCE},

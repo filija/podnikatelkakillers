@@ -3,9 +3,9 @@
 * Inicializuje koren tabulky
 @par1 odkaz na koren (&koren)
 */
-void inicializuj_tabulku(uk_uzel Koren) { // inicializace stromu
+void inicializuj_tabulku(uk_uzel *Koren) { // inicializace stromu
 
-	Koren = NULL;
+	*Koren = NULL;
 }
 
 /*
@@ -21,7 +21,7 @@ tSymbolPtr najdi_v_tabulce(uk_uzel Koren, char *K)	{ // vyhledani uzlu zadaneho 
 		return NULL;									// prazdny strom
 	}
 	if(strcmp(Koren->symbol,K) == 0){
-		return &(Koren->data);
+		return Koren->data;
 	}
 	if(strcmp(Koren->symbol,K) > 0){
 		return najdi_v_tabulce(Koren->LPtr, K);	// klic menci nez zadany - jedeme vlevo
@@ -37,13 +37,13 @@ Funkce vlozi do tabulky zaznam
 @return - v pripade nealokovani noveho korene - nic
 */
 
-int vloz_do_tabulky(uk_uzel Koren, char *K, tSymbol data)	{	// vlozi data s klicem
+int vloz_do_tabulky(uk_uzel *Koren, char *K, tSymbolPtr data)	{	// vlozi data s klicem, nekontroluje se
 
-	if ( Koren != NULL ){
-		if (strcmp((Koren)->symbol,K) > 0)
-			vloz_do_tabulky(((Koren)->LPtr), K, data);
-		else if (strcmp((Koren)->symbol,K) < 0)
-			vloz_do_tabulky(((Koren)->RPtr), K, data);
+	if ( *Koren != NULL ){
+		if (strcmp((*Koren)->symbol,K) > 0)
+			vloz_do_tabulky(&((*Koren)->LPtr), K, data);
+		else if (strcmp((*Koren)->symbol,K) < 0)
+			vloz_do_tabulky(&((*Koren)->RPtr), K, data);
 		else
 			return 1;
 	}else{
@@ -56,7 +56,7 @@ int vloz_do_tabulky(uk_uzel Koren, char *K, tSymbol data)	{	// vlozi data s klic
 		help_ptr->data = data;
 		help_ptr->LPtr = NULL;
 		help_ptr->RPtr = NULL;
-		Koren = help_ptr;
+		*Koren = help_ptr;
 	}
 	return IS_OK;
 }
@@ -74,8 +74,8 @@ void znic_tabulku(uk_uzel Koren) {	//zruseni storomu
 	znic_tabulku((Koren)->LPtr); // jedem vlevo
 	znic_tabulku((Koren)->RPtr);	// jedem vpravo
 	free(Koren->symbol);
-	free(Koren->data->symbol);
-	free(Koren->data->par_typy);
+	free((Koren->data)->symbol);
+	//free(Koren->data->par_typy); // toto bude slozitejsi
 	free(Koren->data);
 	free(Koren);
 	Koren = NULL;
@@ -85,7 +85,7 @@ void znic_tabulku(uk_uzel Koren) {	//zruseni storomu
 * Funkce kontroluje na konci programu vsechny funkce na jejich definici
 * @par1 Koren tabulky
 * @return exit s chybou 3
-*/
+
 
 void check(uk_uzel Koren)	{ // vyhledani uzlu zadaneho klicem
 
@@ -99,7 +99,7 @@ void check(uk_uzel Koren)	{ // vyhledani uzlu zadaneho klicem
 
 		check(Koren->LPtr);	// klic mensi nez zadany - jedeme vlevo
 		check(Koren->RPtr);	// jinak vpravo a znova
-}
+}*/
 
 /*
 * Funkce provede deep copy struktury dat v tabulce symbolu
@@ -107,19 +107,19 @@ void check(uk_uzel Koren)	{ // vyhledani uzlu zadaneho klicem
 * @param zdrojovy ukazatel na strukturu dat
 * @return potvrzeni uspesnosti nebo vnitrni chybu
 */
-int copy_item(tSymbolPtr dest, tSymbolPtr source){
+int copy_item(tSymbolPtr* dest, tSymbolPtr source){
 	tSymbolPtr ukazatel;
 	ukazatel = malloc(sizeof(struct sym));
 	if(ukazatel == NULL){
 		return INTERNAL_ERR; // right code?
 	}
-	ukazatel->symbol = strdup(source->symbol);
+	charDup(&(ukazatel->symbol), source->symbol);
 	ukazatel->typ = source->typ;
 	ukazatel->verze = source->verze;
 	ukazatel->value = source->value;
-	ukazatel->par_typy = strdup(source->par_typy);
+	charDup(&(ukazatel->par_typy), source->par_typy);
 	ukazatel->defined = source->defined;
 	ukazatel->tabulka = source->tabulka;
-	dest = ukazatel;
+	*dest = ukazatel;
 	return IS_OK;
 }

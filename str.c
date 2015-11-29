@@ -96,3 +96,9 @@ void string_from_char(char **ch, string *s){
  	*ch = malloc((sizeof(char))*(s->length));
 	memcpy(*ch,s->str, s->length);
 }
+
+int charDup(char **output, char *input){
+   if ((output = malloc(strlen(input)+1)) == NULL) return -99;
+   if (input) strcpy(*output, input);
+   return 0;
+}

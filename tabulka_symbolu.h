@@ -2,9 +2,14 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include "define.h"
 
 // #define TRUE 1
 // #define FALSE 0
+typedef struct sym tSymbol;
+typedef struct sym *tSymbolPtr;
+typedef struct SymbolTable tSymbolTable;
+typedef struct SymbolTable *uk_uzel;
 
 typedef union
 {
@@ -14,7 +19,7 @@ typedef union
 } uObsah;
 
 
-typedef struct sym   // symbol
+struct sym   // symbol
 {
     char *symbol;       // nazev promenne
     int typ;    // datovy typ symbolu
@@ -24,20 +29,20 @@ typedef struct sym   // symbol
     int defined; // 1 ano, 0 ne
     uk_uzel tabulka; // ukazatel na tabulku - glob ->lok
     // ukazatel na label
-} tSymbol, *tSymbolPtr;
+};
 
-typedef struct SymbolTable
+struct SymbolTable
 {
     char *symbol;
-    tSymbol data;
+    tSymbolPtr data;
     struct SymbolTable *LPtr;
     struct SymbolTable *RPtr;
-} tSymbolTable, *uk_uzel;
+};
 
 
-void inicializuj_tabulku (uk_uzel);
+void inicializuj_tabulku (uk_uzel*);
 tSymbolPtr najdi_v_tabulce  (uk_uzel, char*);
-int vloz_do_tabulky (uk_uzel, char*, tSymbol);
+int vloz_do_tabulky (uk_uzel*, char*, tSymbolPtr);
 void znic_tabulku(uk_uzel);
-void check(uk_uzel);
-int copy_item(tSymbolPtr, tSymbolPtr);
+//void check(uk_uzel);
+int copy_item(tSymbolPtr*, tSymbolPtr);
