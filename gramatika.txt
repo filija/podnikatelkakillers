@@ -1,6 +1,6 @@
 PROGRAM -> DFUNKCE eof			
 DFUNKCE -> FUNKCE DFUNKCE
-FUNKCE -> DEKLARACE DEFINICE
+FUNKCE -> DEKLARACE DEFINICE	//zavedeni lokalni tabulky, zavedeni promenne do ktere se budou ukladat informace
 DFUNKCE -> EPSILON
 DEKLARACE -> PARAMETR lz PARAMETRY pz
 TYP -> int
@@ -35,7 +35,7 @@ VYPIS -> pis TERM DVYPIS
 DVYPIS -> VYPIS						
 DVYPIS -> EPSILON
 
-PROMENNA -> PARAMETR PRIRAD
+PROMENNA -> TYP id PRIRAD
 PROMENNA -> auto id rovnitko expr
 PRIRAD -> rovnitko expr
 PRIRAD -> EPSILON

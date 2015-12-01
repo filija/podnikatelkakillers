@@ -93,12 +93,18 @@ int strGetLength(string *s)
 }
 
 void string_from_char(char **ch, string *s){
- 	*ch = malloc((sizeof(char))*(s->length));
-	memcpy(*ch,s->str, s->length);
+   if (s->length == 0) {
+      *ch = NULL;
+   }
+   else {
+    	*ch = malloc((sizeof(char))*(s->length +1));
+   	strncpy(*ch,s->str, s->length);
+      (*ch)[s->length] = 0;
+   }
 }
 
 int charDup(char **output, char *input){
-   if ((output = malloc(strlen(input)+1)) == NULL) return -99;
+   if ((output = malloc((sizeof(char))*(strlen(input)+1))) == NULL) return -99;
    if (input) strcpy(*output, input);
    return 0;
 }

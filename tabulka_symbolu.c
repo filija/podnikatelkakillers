@@ -8,6 +8,19 @@ void inicializuj_tabulku(uk_uzel *Koren) { // inicializace stromu
 	*Koren = NULL;
 }
 
+int inicializuj_data(tSymbolPtr *symbol){
+	tSymbolPtr help_ptr = malloc(sizeof(struct sym));
+	if (help_ptr == NULL) return INTERNAL_ERR;
+	help_ptr->typ = 0;
+	help_ptr->verze = 0;
+	help_ptr->parametry = NULL;
+	help_ptr->value.i = -1;
+	help_ptr->defined = 0;
+	help_ptr->tabulka = NULL;
+	*symbol = help_ptr;
+	return IS_OK;
+}
+
 /*
 Funkce hleda dle zadaneho klice - symbol, zaznam v tabulce
 @par1 koren
@@ -74,7 +87,7 @@ void znic_tabulku(uk_uzel Koren) {	//zruseni storomu
 	znic_tabulku((Koren)->LPtr); // jedem vlevo
 	znic_tabulku((Koren)->RPtr);	// jedem vpravo
 	free(Koren->symbol);
-	free((Koren->data)->symbol);
+//	free((Koren->data)->symbol);
 	//free(Koren->data->par_typy); // toto bude slozitejsi
 	free(Koren->data);
 	free(Koren);
@@ -107,19 +120,58 @@ void check(uk_uzel Koren)	{ // vyhledani uzlu zadaneho klicem
 * @param zdrojovy ukazatel na strukturu dat
 * @return potvrzeni uspesnosti nebo vnitrni chybu
 */
-int copy_item(tSymbolPtr* dest, tSymbolPtr source){
+int copy_item(tSymbolPtr* dest, tSymbolPtr source){ //nebude potrebovat kopirovat parametry fce, bude vzdy se kopirovat jen promenna!
 	tSymbolPtr ukazatel;
 	ukazatel = malloc(sizeof(struct sym));
 	if(ukazatel == NULL){
 		return INTERNAL_ERR; // right code?
 	}
-	charDup(&(ukazatel->symbol), source->symbol);
+//	charDup(&(ukazatel->symbol), source->symbol);
 	ukazatel->typ = source->typ;
 	ukazatel->verze = source->verze;
 	ukazatel->value = source->value;
-	charDup(&(ukazatel->par_typy), source->par_typy);
+	//charDup(&(ukazatel->par_typy), source->par_typy);
 	ukazatel->defined = source->defined;
 	ukazatel->tabulka = source->tabulka;
 	*dest = ukazatel;
 	return IS_OK;
+}
+
+int vloz_do_parametru(int typ, char* nazev, param **parametry_v){
+	if (*parametry_v == NULL){		
+		*parametry_v = malloc(sizeof(struct sym_param));
+		if(*parametry_v == NULL) return INTERNAL_ERR;
+		(*parametry_v)->typ = typ;
+		(*parametry_v)->name = nazev;
+		(*parametry_v)->next = NULL;
+		return IS_OK;
+	}
+	param* tmpparam = *parametry_v;
+	while (tmpparam->next != NULL){
+		tmpparam = tmpparam->next;
+	}
+	param* tmpparam2 = malloc(sizeof(struct sym_param));
+	if(tmpparam2 == NULL) return INTERNAL_ERR;
+	tmpparam2->typ = typ;
+	tmpparam2->name = nazev;
+	tmpparam2->next = NULL;
+	tmpparam->next = tmpparam2;
+	return IS_OK;
+}
+
+int zkontroluj_parametry(param *parametr, tSymbolPtr data){
+	if (parametr == NULL){
+		if (data->parametry == NULL) return IS_OK;
+		else return SEM_ERR;
+	}
+	if (data->parametry == NULL) return SEM_ERR;
+	param *tmp = data->parametry;
+	while (1){
+		if ((tmp->typ)!=(parametr->typ)) return SEM_ERR;
+		if (strcmp (tmp->name, parametr->name)) return SEM_ERR;
+		if (parametr->next == NULL && tmp->next == NULL) return IS_OK;
+		if (parametr->next == NULL || tmp->next == NULL) return SEM_ERR;
+		parametr = parametr->next;
+		tmp=tmp->next;
+	}
 }

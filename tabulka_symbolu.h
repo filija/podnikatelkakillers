@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include "define.h"
+#include "str.h"
 
 // #define TRUE 1
 // #define FALSE 0
@@ -18,14 +19,20 @@ typedef union
     char *s;
 } uObsah;
 
+typedef struct sym_param
+{
+	char *name;
+	int typ;
+	struct sym_param *next;
+} param;
 
 struct sym   // symbol
 {
-    char *symbol;       // nazev promenne
-    int typ;    // datovy typ symbolu
+//    char *symbol;       // nazev promenne
+    int typ;    // datovy typ symbolu 0 = nedef, 1 = int, 2 = double, 3 = string, 4 = auto
     int verze;         // 1 funkce 0 promenna
     uObsah value;        // obsah int, float, string
-    char *par_typy; // typy parametru void f(string, bool, bool) >> vsbb
+    param *parametry; // typy a jmena parametru
     int defined; // 1 ano, 0 ne
     uk_uzel tabulka; // ukazatel na tabulku - glob ->lok
     // ukazatel na label
@@ -41,8 +48,11 @@ struct SymbolTable
 
 
 void inicializuj_tabulku (uk_uzel*);
+int inicializuj_data(tSymbolPtr *symbol);
 tSymbolPtr najdi_v_tabulce  (uk_uzel, char*);
 int vloz_do_tabulky (uk_uzel*, char*, tSymbolPtr);
 void znic_tabulku(uk_uzel);
 //void check(uk_uzel);
 int copy_item(tSymbolPtr*, tSymbolPtr);
+int vloz_do_parametru(int typ, char* nazev, param **parametry_v);
+int zkontroluj_parametry(param *parametr, tSymbolPtr data);

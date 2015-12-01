@@ -15,7 +15,7 @@
 int token;
 int countVar = 0;
 uk_uzel table;
-uk_uzel glob_table;
+uk_uzel global_table;
 // ptrStack stack;
 string attr;
 char *attrc;
@@ -108,7 +108,7 @@ int Table[14][14] =
 
 };
 
-int syntax_precedencka(){ //prejmenovat magicke promenne, na promenne v define, nekontroluje jestli prebyva leva zavorka, to taky osetrit
+int syntax_precedencka(){	//neni potreba uvolnovat znaminka atd... neukladaji stringy
 int tok1;
 int tok2;
 int tok3;
@@ -127,7 +127,8 @@ int nacteny = S_DOLAR;		//hodnota/nazev nacitaneho tokenu
 //push na teminallist DOLAR
 pushPrc(S_DOLAR, NULL, &terminal_list);
 string_from_char(&attrc, &attr);
-nacteny = prec_prevod(&token, &attrc);	//zase otazka jestli se ma pouzit dereference, nebo attr sam o sbe je ukazatel, pak se podivat a poresit na vsech mistech
+nacteny = prec_prevod(&token, &attrc);
+if (Table[terminalTop][nacteny] == SHERR) return SYN_ERR;	//Vyraz musi neco obsahovat
 do{
 	vysl_prc = Table[terminalTop][nacteny];
 	switch (vysl_prc){
@@ -145,7 +146,6 @@ do{
 			if(tok1 != ID) return SYN_ERR; //nejaka chyba
 			if(tok2 != L_ZAVORKA) return SYN_ERR;
 			pushPrc(tok1, atr1, &PSAlist);
-			free(atr2);
 			//vytahnout levou zavorku z terminal_list (pop(terminallist))
 			//2x pop a nekam si ulozit hodnoty z PSAlist
 			//zkontrolovat jestli odpovida tvar: "(ID)", pokud ne vratit spravny error
@@ -174,8 +174,7 @@ do{
 					// zkotrolovat jestli odpovida tvar ID + ID, pokud ne vyhodit error (napr mohlo by prijit + ID +, v pripade ze by se redukce provedla pred zadanim promenne)
 					// pokud vse odpovida:
 					// vygenerovat promennou do ktere se ulozi vysledek
-					free(atr2);	//recyklujeme promenne, tuto informaci nepotrebujeme
-					generateVariable(&atr2);
+					generateVariable(&atr2); //v atr2 je zarucene NULL, pokud se to sem dostalo, proto tuto promennou muzeme pouzit
 					//nacpat promennou do lokalni tabulky
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
 					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
@@ -191,7 +190,6 @@ do{
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
 					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
 					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
-					free(atr2);	//recyklujeme promenne, tuto informaci nepotrebujeme
 					generateVariable(&atr2);
 					//nacpat promennou do lokalni tabulky
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
@@ -208,7 +206,6 @@ do{
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
 					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
 					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
-					free(atr2);	//recyklujeme promenne, tuto informaci nepotrebujeme
 					generateVariable(&atr2);
 					//nacpat promennou do lokalni tabulky
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
@@ -225,7 +222,6 @@ do{
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
 					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
 					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
-					free(atr2);	//recyklujeme promenne, tuto informaci nepotrebujeme
 					generateVariable(&atr2);
 					//nacpat promennou do lokalni tabulky
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
@@ -242,7 +238,6 @@ do{
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
 					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
 					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
-					free(atr2);	//recyklujeme promenne, tuto informaci nepotrebujeme
 					generateVariable(&atr2);
 					//nacpat promennou do lokalni tabulky
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
@@ -259,7 +254,6 @@ do{
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
 					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
 					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
-					free(atr2);	//recyklujeme promenne, tuto informaci nepotrebujeme
 					generateVariable(&atr2);
 					//nacpat promennou do lokalni tabulky
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
@@ -276,7 +270,6 @@ do{
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
 					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
 					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
-					free(atr2);	//recyklujeme promenne, tuto informaci nepotrebujeme
 					generateVariable(&atr2);
 					//nacpat promennou do lokalni tabulky
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
@@ -293,7 +286,6 @@ do{
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
 					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
 					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
-					free(atr2);	//recyklujeme promenne, tuto informaci nepotrebujeme
 					generateVariable(&atr2);
 					//nacpat promennou do lokalni tabulky
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
@@ -310,7 +302,6 @@ do{
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
 					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
 					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
-					free(atr2);	//recyklujeme promenne, tuto informaci nepotrebujeme
 					generateVariable(&atr2);
 					//nacpat promennou do lokalni tabulky
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
@@ -327,7 +318,6 @@ do{
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
 					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
 					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
-					free(atr2);	//recyklujeme promenne, tuto informaci nepotrebujeme
 					generateVariable(&atr2);
 					//nacpat promennou do lokalni tabulky
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
@@ -353,7 +343,7 @@ return IS_OK;
 }
 
 
-int prec_prevod(int* token, char** attrc){ //ma to byt ukazatel, nebo string sam o sobe je ukazatel na strukturu?
+int prec_prevod(int* token, char** attrc){
 	switch(*token){
 		case INT_V:
 			//attr se prevede na int hodnotu
@@ -412,9 +402,9 @@ int prec_prevod(int* token, char** attrc){ //ma to byt ukazatel, nebo string sam
 
 /*Hlavni funkce parseru*/
 //int parse(struct symbol_table* table_hl, tList *list, ptrStack stack_hl){
-int parse(){ 
+int parse(uk_uzel *GT){ 
   int result;
-//  table = table_hl;/*Nastaveni tabulky*/
+  global_table = *GT;/*Nastaveni tabulky*/
 //  Stack = stack_hl;/*Nastaveni zasobniku*/
   strInit(&attr);
   
@@ -484,15 +474,15 @@ int funkce(){
 	//nekde pri deklaraci funkce, se bude kontrolovat, jeslti nazev funkce neni shodny s klicovym slovem
 		/*<FUNKCE>*/
 	int outcome;
-	
+	tSymbolPtr funkce_v = NULL;
 	switch(token){
 		case INT:
 		case DOUBLE:
 		case STRING:
 			/*FUNKCE → DEKLARACE DEFINICE*/
-			outcome = deklarace();
+			outcome = deklarace(&funkce_v);
 			if (outcome != IS_OK) return outcome;
-			outcome = definice();
+			outcome = definice(funkce_v);
 			if (outcome != IS_OK) return outcome;
 			return IS_OK;
 			break;
@@ -502,22 +492,42 @@ int funkce(){
 	}	
 }
 
-int deklarace(){
+int deklarace(tSymbolPtr *funkce_v){
 			/*<DEKLARACE>*/
 	int outcome;
-	
+	int typ_v=0;
+	char* nazev=NULL;
+	param* parametry_v=NULL;
 	switch(token){
 		case INT:
 		case DOUBLE:
 		case STRING:
-			/*DEKLARACE → PARAMETR lz PARAMETRY pz*/
-			outcome = parametr();
+			/*DEKLARACE → TYP id lz PARAMETRY pz*/
+			outcome = typ(&typ_v);
 			if (outcome != IS_OK) return outcome;
+			if (token != ID) return SYN_ERR;
+			string_from_char(&nazev, &attr);
+			getToken
 			if (token != L_ZAVORKA) return SYN_ERR;
 			getToken
-			outcome = parametry();
+			outcome = parametry(&parametry_v);
 			if (outcome != IS_OK) return outcome;
 			if (token != P_ZAVORKA) return SYN_ERR;
+			tSymbolPtr hledany;
+			hledany = najdi_v_tabulce (global_table, nazev);
+			if (hledany != NULL){
+				if (hledany->typ != typ_v) return SEM_ERR;
+				outcome = zkontroluj_parametry(parametry_v, hledany);
+				if (outcome != IS_OK) return outcome;
+			}
+			else {
+				inicializuj_data(&hledany); //alokuje pamet a inicializuje hodnoty
+				hledany->typ = typ_v;
+				hledany->verze = 1;
+				hledany->parametry = parametry_v;
+				vloz_do_tabulky (&global_table, nazev, hledany);
+			}
+			*funkce_v = hledany;
 			getToken
 			return IS_OK;
 			break;
@@ -527,20 +537,23 @@ int deklarace(){
 	}	
 }
 
-int typ(){
+int typ(int* typ_v){
 	/* TYP */
 	switch(token){
 		case INT:
+			*typ_v = 1;
 			/*TYP → int*/
 			getToken
 			return IS_OK;
 			break;
 		case DOUBLE:
+			*typ_v = 2;
 			/*TYP → double*/
 			getToken
 			return IS_OK;
 			break;
 		case STRING:
+			*typ_v = 3;
 			/*TYP → string*/
 			getToken
 			return IS_OK;
@@ -551,7 +564,7 @@ int typ(){
 	}
 }
 
-int parametry(){
+int parametry(param** parametry_v){
 		/*<PARAMETRY>*/
 	int outcome;
 	switch(token){
@@ -559,9 +572,9 @@ int parametry(){
 		case DOUBLE:
 		case STRING:
 		/* PARAMETRY → PARAMETR DPARAMETR */
-			outcome = parametr();
+			outcome = parametr(parametry_v);
 			if (outcome != IS_OK) return outcome;
-			outcome = dparametr();
+			outcome = dparametr(parametry_v);
 			if (outcome != IS_OK) return outcome;
 			return IS_OK;
 			break;
@@ -575,7 +588,7 @@ int parametry(){
 	}
 }
 
-int dparametr(){
+int dparametr(param** parametry_v){
 	/*<DPARAMETRY>*/
 	int outcome;
 	switch(token){
@@ -586,9 +599,9 @@ int dparametr(){
 		case CARKA:
 			/*DPARAMETR → carka PARAMETR DPARAMETR*/
 			getToken
-			outcome = parametr();
+			outcome = parametr(parametry_v);
 			if (outcome != IS_OK) return outcome;
-			outcome = dparametr();
+			outcome = dparametr(parametry_v);
 			if (outcome != IS_OK) return outcome;
 			return IS_OK;
 			break;
@@ -598,18 +611,22 @@ int dparametr(){
 	}
 }
 
-int parametr(){
+int parametr(param** parametry_v){
 	/* PARAMETR */
 	int outcome;
+	int typ_v;
+	char* nazev=NULL;
 
 	switch(token){
 		case INT:
 		case DOUBLE:
 		case STRING:
 			/*PARAMETR → TYP id*/
-			outcome = typ();
+			outcome = typ(&typ_v);
 			if (outcome != IS_OK) return outcome;
 			if (token != ID) return SYN_ERR;
+			string_from_char(&nazev, &attr);
+			vloz_do_parametru(typ_v,nazev,parametry_v);
 			getToken
 			return IS_OK;
 			break;
@@ -668,13 +685,19 @@ int prikazy(){
 	}
 }	
 
-int definice(){
+int definice(tSymbolPtr funkce_v){
 	/* DEFINICE → SLOZENY */
 	int outcome;
 	switch(token){
 		case LS_ZAVORKA:
+			if (funkce_v->defined == 1) return SEM_ERR;
+			funkce_v->defined = 1;
+			//vytvorit instrukci label a dat ji definici funkci
+			//vytvorit lokalni tabulku a dat ji definici funkce
+			//vyskladat parametry do lokalni tabulky
 			outcome = slozeny();
 			if (outcome != IS_OK) return outcome;
+			//uzavrit lokalni tabulku (ukazatel v parser.c = NULL)
 			return IS_OK;
 			break;
 		case STREDNIK:
@@ -895,13 +918,16 @@ int dvypis(){
 
 int promenna(){
 	int outcome;
+	int typ_v;
 	switch(token){
 		case INT:
 		case DOUBLE:
 		case STRING:
-			/* PROMENNA → PARAMETR PRIRAD */
-			outcome = parametr();
+			/* PROMENNA → TYP id PRIRAD */
+			outcome = typ(&typ_v);
 			if (outcome != IS_OK) return outcome;
+			if (token != ID) return SYN_ERR;
+			getToken
 			outcome = prirad();
 			if (outcome != IS_OK) return outcome;
 			return IS_OK;

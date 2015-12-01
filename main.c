@@ -2,6 +2,7 @@
 #include "str.h"
 #include "parser.h"
 #include "scanner.h"
+#include "tabulka_symbolu.h"
 #include "define.h"
 
 int main(int argc, char** argv)
@@ -18,8 +19,11 @@ int main(int argc, char** argv)
       return - INTERNAL_ERR;
    }   
    setSourceFile(f);
+
+   uk_uzel global_table=NULL; 
+
    int result;
-   result = parse();
+   result = parse(&global_table);
    printf("Result: %i\n", result);
    fclose(f);
    if (result) return -result;
