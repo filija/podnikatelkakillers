@@ -105,6 +105,6 @@ void string_from_char(char **ch, string *s){
 
 int charDup(char **output, char *input){
    if ((output = malloc((sizeof(char))*(strlen(input)+1))) == NULL) return -99;
-   if (input) strcpy(*output, input);
+   if (input!=NULL) strcpy(*output, input);
    return 0;
 }

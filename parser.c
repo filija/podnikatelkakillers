@@ -1,25 +1,13 @@
-#include <stdio.h>
-#include <malloc.h>
-#include <string.h>
-//#include "str.h"
-//#include "stable.h"
-//#include "ilist.h"
-#include "scanner.h"
 #include "parser.h"
-#include "define.h"
-//#include "syntax.h"
-#include "tabulka_symbolu.h"
 
 #define getToken if ((token = getNextToken(&attr)) == LEX_ERR){return LEX_ERR;}
 
 int token;
 int countVar = 0;
-uk_uzel table;
-uk_uzel global_table;
+uk_uzel table = NULL;
+uk_uzel global_table = NULL;
 // ptrStack stack;
 string attr;
-char *attrc;
-string *params;
 //tSymbolPtr hledane_id;
 tSymbolPtr data; // data prubezna
 
@@ -40,11 +28,19 @@ tSymbolPtr data; // data prubezna
    return result;
 }*/
 
+
+void print_koren_udu(uk_uzel tabulka){
+	if(tabulka == NULL) return;
+	printf("Jmeno a hodnota(int) je >>> %s %i\n", tabulka->symbol, tabulka->data->value.i);
+	print_koren_udu(tabulka->LPtr);
+	print_koren_udu(tabulka->RPtr);
+}
+
 void generateVariable(char **var)
 {
   if ((*var = (char*) malloc(sizeof(char)*15)) == NULL) return;
   memset(*var,0,15);
-  sprintf (*var, "$%d", countVar);
+  sprintf (*var, "$%i", countVar);
   countVar ++;
 }
 //stringy uvnitr kopirovat pro ID, u ostatnich neni relevatni a muze byt string NULL
@@ -57,9 +53,9 @@ int pushPrc(int s_token, char* promenna, PrcPtr *list) {	//navratova hodnota fun
 	*list = tmpItem;
 	return 0;
 }
-int popPrc (int* s_token, char* promenna, PrcPtr *list){	//navratova hodnota, jestli neni vstupni list NULL
+int popPrc (int* s_token, char** promenna, PrcPtr *list){	//navratova hodnota, jestli neni vstupni list NULL
 	if (*list == NULL) return -1;
-	promenna = (*list)->promenna;
+	*promenna = (*list)->promenna;
 	*s_token = (*list)->s_token;
 	PrcPtr tmp = *list;
 	*list = (*list)->next;
@@ -108,14 +104,18 @@ int Table[14][14] =
 
 };
 
-int syntax_precedencka(){	//neni potreba uvolnovat znaminka atd... neukladaji stringy
+int syntax_precedencka(char **p_result){	//neni potreba uvolnovat znaminka atd... neukladaji stringy
 int tok1;
 int tok2;
 int tok3;
+int type_var;
 char* atr1 = NULL;
 char* atr2 = NULL;
 char* atr3 = NULL;
-
+char *attrc = NULL;
+tSymbolPtr vkladany1 = NULL;
+tSymbolPtr vkladany2 = NULL;
+tSymbolPtr vkladany3 = NULL;
 PrcPtr PSAlist = NULL;	//Zasobnik vsech ulozenych prvku (pushdown zasobnik)
 PrcPtr terminal_list = NULL;	//zasobik prvku, ktere jsou pro nas relevantni pro porovnavani posledniho znaku na zasobniku, (v prezentacich se za ne uklada "<")
 int vysl_prc = 0;		//zde se uklada navratova hodnota z tabulky
@@ -141,8 +141,8 @@ do{
 			break;
 		case HADLE:
 			poptPrc(&terminal_list);
-			if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
-			if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
+			if (popPrc(&tok1, &atr1, &PSAlist)) return SYN_ERR;
+			if (popPrc(&tok2, &atr2, &PSAlist)) return SYN_ERR;
 			if(tok1 != ID) return SYN_ERR; //nejaka chyba
 			if(tok2 != L_ZAVORKA) return SYN_ERR;
 			pushPrc(tok1, atr1, &PSAlist);
@@ -151,11 +151,14 @@ do{
 			//zkontrolovat jestli odpovida tvar: "(ID)", pokud ne vratit spravny error
 			//pokud tvar odpovida, pushnout ID na PSAlist
 			getToken;
-			string_from_char(&attrc, &attr);
 			pushPrc(S_ID, NULL, &terminal_list);
+			string_from_char(&attrc, &attr);
 			nacteny = prec_prevod(&token, &attrc);			
 			break;
 		case RPLCE:
+			vkladany1 = NULL;
+			vkladany2 = NULL;
+			vkladany3 = NULL;
 			switch(terminalTop){
 				case S_ID:
 					poptPrc(&terminal_list);
@@ -163,165 +166,260 @@ do{
 					break;
 				case S_PLUS:
 					poptPrc(&terminal_list);
-					if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
-					if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
-					if (popPrc(&tok3, atr3, &PSAlist)) return SYN_ERR;
-					if(tok1 != ID) return SYN_ERR; //nejaka chyba
+					if (popPrc(&tok1, &atr1, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok2, &atr2, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok3, &atr3, &PSAlist)) return SYN_ERR;
+					if(tok1 != ID) return SYN_ERR;
 					if(tok2 != PLUS) return SYN_ERR;
-					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-					// pop(terminallist) -> zpracovali jsme terminal na topu
-					// 3x pop PSAlist a kazdy pop si ulozit, nezapomenout ze se to popuje od zadu!!! a-b vs b-a
-					// zkotrolovat jestli odpovida tvar ID + ID, pokud ne vyhodit error (napr mohlo by prijit + ID +, v pripade ze by se redukce provedla pred zadanim promenne)
-					// pokud vse odpovida:
-					// vygenerovat promennou do ktere se ulozi vysledek
-					generateVariable(&atr2); //v atr2 je zarucene NULL, pokud se to sem dostalo, proto tuto promennou muzeme pouzit
-					//nacpat promennou do lokalni tabulky
-					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
-					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
+					if(tok3 != ID) return SYN_ERR;
+					vkladany1 = najdi_v_tabulce(table, atr1);
+					vkladany3 = najdi_v_tabulce(table, atr3);
+					if (vkladany1 == NULL || vkladany3 == NULL) return SYN_ERR;
+					if (vkladany1->defined == 0) return SYN_ERR;
+					if (vkladany3->defined == 0) return SYN_ERR;
+					if (vkladany1->typ == INT_V && vkladany3->typ == INT_V) type_var = 1;
+					else if (vkladany1->typ == DOUBLE_V && vkladany3->typ == DOUBLE_V) type_var = 2;
+					else if (vkladany1->typ == DOUBLE_V && vkladany3->typ == INT_V) type_var = 2;
+					else if (vkladany1->typ == INT_V && vkladany3->typ == DOUBLE_V) type_var = 2;
+					else return STYPE_ERR;
+					generateVariable(&atr2); //v atr2 je zarucene NULL
+					inicializuj_data(&vkladany2);
+					vkladany2->typ = type_var;
+					vkladany2->defined = 1;
+					vloz_do_tabulky(&table, atr2, vkladany2);
+					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID -> vkladany2 = vkladany 3 - vkladany 1
+					printf("GENEROVANA INSTRUKCE: %s = %s + %s\n", atr2, atr3, atr1);
 					pushPrc(ID, atr2, &PSAlist);
 					break;
 				case S_MINUS:
 					poptPrc(&terminal_list);
-					if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
-					if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
-					if (popPrc(&tok3, atr3, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok1, &atr1, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok2, &atr2, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok3, &atr3, &PSAlist)) return SYN_ERR;
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != MINUS) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
-					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
-					generateVariable(&atr2);
-					//nacpat promennou do lokalni tabulky
-					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
-					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
+					vkladany1 = najdi_v_tabulce(table, atr1);
+					vkladany3 = najdi_v_tabulce(table, atr3);
+					if (vkladany1 == NULL || vkladany3 == NULL) return SYN_ERR;
+					if (vkladany1->defined == 0) return SYN_ERR;
+					if (vkladany3->defined == 0) return SYN_ERR;
+					if (vkladany1->typ == INT_V && vkladany3->typ == INT_V) type_var = 1;
+					else if (vkladany1->typ == DOUBLE_V && vkladany3->typ == DOUBLE_V) type_var = 2;
+					else if (vkladany1->typ == DOUBLE_V && vkladany3->typ == INT_V) type_var = 2;
+					else if (vkladany1->typ == INT_V && vkladany3->typ == DOUBLE_V) type_var = 2;
+					else return STYPE_ERR;
+					generateVariable(&atr2); //v atr2 je zarucene NULL
+					inicializuj_data(&vkladany2);
+					vkladany2->typ = type_var;
+					vkladany2->defined = 1;
+					vloz_do_tabulky(&table, atr2, vkladany2);
+					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID -> vkladany2 = vkladany 3 - vkladany 1
+					printf("GENEROVANA INSTRUKCE: %s = %s - %s\n", atr2, atr3, atr1);
 					pushPrc(ID, atr2, &PSAlist);
 					break;
 				case S_NASOBENI:
 					poptPrc(&terminal_list);
-					if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
-					if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
-					if (popPrc(&tok3, atr3, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok1, &atr1, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok2, &atr2, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok3, &atr3, &PSAlist)) return SYN_ERR;
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != NASOBENI) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
-					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
-					generateVariable(&atr2);
-					//nacpat promennou do lokalni tabulky
-					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
-					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
+					vkladany1 = najdi_v_tabulce(table, atr1);
+					vkladany3 = najdi_v_tabulce(table, atr3);
+					if (vkladany1 == NULL || vkladany3 == NULL) return SYN_ERR;
+					if (vkladany1->defined == 0) return SYN_ERR;
+					if (vkladany3->defined == 0) return SYN_ERR;
+					if (vkladany1->typ == INT_V && vkladany3->typ == INT_V) type_var = 1;
+					else if (vkladany1->typ == DOUBLE_V && vkladany3->typ == DOUBLE_V) type_var = 2;
+					else if (vkladany1->typ == DOUBLE_V && vkladany3->typ == INT_V) type_var = 2;
+					else if (vkladany1->typ == INT_V && vkladany3->typ == DOUBLE_V) type_var = 2;
+					else return STYPE_ERR;
+					generateVariable(&atr2); //v atr2 je zarucene NULL
+					inicializuj_data(&vkladany2);
+					vkladany2->typ = type_var;
+					vkladany2->defined = 1;
+					vloz_do_tabulky(&table, atr2, vkladany2);
+					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID -> vkladany2 = vkladany 3 * vkladany 1
+					printf("GENEROVANA INSTRUKCE: %s = %s * %s\n", atr2, atr3, atr1);
 					pushPrc(ID, atr2, &PSAlist);
 					break;
 				case S_DELENI:
 					poptPrc(&terminal_list);
-					if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
-					if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
-					if (popPrc(&tok3, atr3, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok1, &atr1, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok2, &atr2, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok3, &atr3, &PSAlist)) return SYN_ERR;
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != DELENI) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
-					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
-					generateVariable(&atr2);
-					//nacpat promennou do lokalni tabulky
-					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
-					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
+					vkladany1 = najdi_v_tabulce(table, atr1);
+					vkladany3 = najdi_v_tabulce(table, atr3);
+					if (vkladany1 == NULL || vkladany3 == NULL) return SYN_ERR;
+					if (vkladany1->defined == 0) return SYN_ERR;
+					if (vkladany3->defined == 0) return SYN_ERR;
+					if (vkladany1->typ == INT_V && vkladany3->typ == INT_V) type_var = 1;
+					else if (vkladany1->typ == DOUBLE_V && vkladany3->typ == DOUBLE_V) type_var = 2;
+					else if (vkladany1->typ == DOUBLE_V && vkladany3->typ == INT_V) type_var = 2;
+					else if (vkladany1->typ == INT_V && vkladany3->typ == DOUBLE_V) type_var = 2;
+					else return STYPE_ERR;
+					generateVariable(&atr2); //v atr2 je zarucene NULL
+					inicializuj_data(&vkladany2);
+					vkladany2->typ = type_var;
+					vkladany2->defined = 1;
+					vloz_do_tabulky(&table, atr2, vkladany2);
+					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID -> vkladany2 = vkladany 3 / vkladany 1
+					printf("GENEROVANA INSTRUKCE: %s = %s / %s\n", atr2, atr3, atr1);
 					pushPrc(ID, atr2, &PSAlist);
 					break;
 				case S_ROVNA_SE:
 					poptPrc(&terminal_list);
-					if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
-					if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
-					if (popPrc(&tok3, atr3, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok1, &atr1, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok2, &atr2, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok3, &atr3, &PSAlist)) return SYN_ERR;
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != ROVNA_SE) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
-					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
-					generateVariable(&atr2);
-					//nacpat promennou do lokalni tabulky
-					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
-					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
+					vkladany1 = najdi_v_tabulce(table, atr1);
+					vkladany3 = najdi_v_tabulce(table, atr3);
+					if (vkladany1 == NULL || vkladany3 == NULL) return SYN_ERR;
+					if (vkladany1->defined == 0) return SYN_ERR;
+					if (vkladany3->defined == 0) return SYN_ERR;
+					if ((vkladany1->typ == INT_V || vkladany1->typ == DOUBLE_V) && (vkladany3->typ == INT_V || vkladany3->typ == DOUBLE_V)) type_var = 1;
+					else if (vkladany1->typ == STRING_V && vkladany3->typ == STRING_V) type_var = 1;
+					else return STYPE_ERR;
+					generateVariable(&atr2); //v atr2 je zarucene NULL
+					inicializuj_data(&vkladany2);
+					vkladany2->typ = type_var;
+					vkladany2->defined = 1;
+					vloz_do_tabulky(&table, atr2, vkladany2);
+					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID -> vkladany2 = vkladany 3 == vkladany 1
+					printf("GENEROVANA INSTRUKCE: %s = %s == %s\n", atr2, atr3, atr1);
 					pushPrc(ID, atr2, &PSAlist);
 					break;
 				case S_MENE_NEBO_ROVNO:
 					poptPrc(&terminal_list);
-					if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
-					if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
-					if (popPrc(&tok3, atr3, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok1, &atr1, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok2, &atr2, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok3, &atr3, &PSAlist)) return SYN_ERR;
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != MENE_NEBO_ROVNO) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
-					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
-					generateVariable(&atr2);
-					//nacpat promennou do lokalni tabulky
-					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
-					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
+					vkladany1 = najdi_v_tabulce(table, atr1);
+					vkladany3 = najdi_v_tabulce(table, atr3);
+					if (vkladany1 == NULL || vkladany3 == NULL) return SYN_ERR;
+					if (vkladany1->defined == 0) return SYN_ERR;
+					if (vkladany3->defined == 0) return SYN_ERR;
+					if ((vkladany1->typ == INT_V || vkladany1->typ == DOUBLE_V) && (vkladany3->typ == INT_V || vkladany3->typ == DOUBLE_V)) type_var = 1;
+					else if (vkladany1->typ == STRING_V && vkladany3->typ == STRING_V) type_var = 1;
+					else return STYPE_ERR;
+					generateVariable(&atr2); //v atr2 je zarucene NULL
+					inicializuj_data(&vkladany2);
+					vkladany2->typ = type_var;
+					vkladany2->defined = 1;
+					vloz_do_tabulky(&table, atr2, vkladany2);
+					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID -> vkladany2 = vkladany 3 == vkladany 1
+					printf("GENEROVANA INSTRUKCE: %s = %s <= %s\n", atr2, atr3, atr1);
 					pushPrc(ID, atr2, &PSAlist);
 					break;
 				case S_MENE:
 					poptPrc(&terminal_list);
-					if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
-					if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
-					if (popPrc(&tok3, atr3, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok1, &atr1, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok2, &atr2, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok3, &atr3, &PSAlist)) return SYN_ERR;
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != MENE) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
-					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
-					generateVariable(&atr2);
-					//nacpat promennou do lokalni tabulky
-					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
-					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
+					vkladany1 = najdi_v_tabulce(table, atr1);
+					vkladany3 = najdi_v_tabulce(table, atr3);
+					if (vkladany1 == NULL || vkladany3 == NULL) return SYN_ERR;
+					if (vkladany1->defined == 0) return SYN_ERR;
+					if (vkladany3->defined == 0) return SYN_ERR;
+					if ((vkladany1->typ == INT_V || vkladany1->typ == DOUBLE_V) && (vkladany3->typ == INT_V || vkladany3->typ == DOUBLE_V)) type_var = 1;
+					else if (vkladany1->typ == STRING_V && vkladany3->typ == STRING_V) type_var = 1;
+					else return STYPE_ERR;
+					generateVariable(&atr2); //v atr2 je zarucene NULL
+					inicializuj_data(&vkladany2);
+					vkladany2->typ = type_var;
+					vkladany2->defined = 1;
+					vloz_do_tabulky(&table, atr2, vkladany2);
+					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID -> vkladany2 = vkladany 3 == vkladany 1
+					printf("GENEROVANA INSTRUKCE: %s = %s < %s\n", atr2, atr3, atr1);
 					pushPrc(ID, atr2, &PSAlist);
 					break;
 				case S_NEROVNOST:
 					poptPrc(&terminal_list);
-					if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
-					if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
-					if (popPrc(&tok3, atr3, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok1, &atr1, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok2, &atr2, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok3, &atr3, &PSAlist)) return SYN_ERR;
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != NEROVNOST) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
-					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
-					generateVariable(&atr2);
-					//nacpat promennou do lokalni tabulky
-					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
-					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
+					vkladany1 = najdi_v_tabulce(table, atr1);
+					vkladany3 = najdi_v_tabulce(table, atr3);
+					if (vkladany1 == NULL || vkladany3 == NULL) return SYN_ERR;
+					if (vkladany1->defined == 0) return SYN_ERR;
+					if (vkladany3->defined == 0) return SYN_ERR;
+					if ((vkladany1->typ == INT_V || vkladany1->typ == DOUBLE_V) && (vkladany3->typ == INT_V || vkladany3->typ == DOUBLE_V)) type_var = 1;
+					else if (vkladany1->typ == STRING_V && vkladany3->typ == STRING_V) type_var = 1;
+					else return STYPE_ERR;
+					generateVariable(&atr2); //v atr2 je zarucene NULL
+					inicializuj_data(&vkladany2);
+					vkladany2->typ = type_var;
+					vkladany2->defined = 1;
+					vloz_do_tabulky(&table, atr2, vkladany2);
+					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID -> vkladany2 = vkladany 3 == vkladany 1
+					printf("GENEROVANA INSTRUKCE: %s = %s != %s\n", atr2, atr3, atr1);
 					pushPrc(ID, atr2, &PSAlist);
 					break;
 				case S_VICE_NEBO_ROVNO:
 					poptPrc(&terminal_list);
-					if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
-					if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
-					if (popPrc(&tok3, atr3, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok1, &atr1, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok2, &atr2, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok3, &atr3, &PSAlist)) return SYN_ERR;
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != VICE_NEBO_ROVNO) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
-					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
-					generateVariable(&atr2);
-					//nacpat promennou do lokalni tabulky
-					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
-					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
+					vkladany1 = najdi_v_tabulce(table, atr1);
+					vkladany3 = najdi_v_tabulce(table, atr3);
+					if (vkladany1 == NULL || vkladany3 == NULL) return SYN_ERR;
+					if (vkladany1->defined == 0) return SYN_ERR;
+					if (vkladany3->defined == 0) return SYN_ERR;
+					if ((vkladany1->typ == INT_V || vkladany1->typ == DOUBLE_V) && (vkladany3->typ == INT_V || vkladany3->typ == DOUBLE_V)) type_var = 1;
+					else if (vkladany1->typ == STRING_V && vkladany3->typ == STRING_V) type_var = 1;
+					else return STYPE_ERR;
+					generateVariable(&atr2); //v atr2 je zarucene NULL
+					inicializuj_data(&vkladany2);
+					vkladany2->typ = type_var;
+					vkladany2->defined = 1;
+					vloz_do_tabulky(&table, atr2, vkladany2);
+					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID -> vkladany2 = vkladany 3 == vkladany 1
+					printf("GENEROVANA INSTRUKCE: %s = %s >= %s\n", atr2, atr3, atr1);
 					pushPrc(ID, atr2, &PSAlist);
 					break;
 				case S_VICE:
 					poptPrc(&terminal_list);
-					if (popPrc(&tok1, atr1, &PSAlist)) return SYN_ERR;
-					if (popPrc(&tok2, atr2, &PSAlist)) return SYN_ERR;
-					if (popPrc(&tok3, atr3, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok1, &atr1, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok2, &atr2, &PSAlist)) return SYN_ERR;
+					if (popPrc(&tok3, &atr3, &PSAlist)) return SYN_ERR;
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != VICE) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-					//ta sama opici prace jak vyse, akorat s jinym znaminkem, a bude to pro vsechny operace, ktere nasleduji
-					//mozna by ten kod sel zefektivnit, ze case bude potom az na kazde generovani instrukci, avsak takto je to bezpecny a lehceji se dohledaji chyby
-					generateVariable(&atr2);
-					//nacpat promennou do lokalni tabulky
-					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID
-					// pushnout do PSAlist vygenerovanou promennout (tu do ktere se ulozil vysledek)
+					vkladany1 = najdi_v_tabulce(table, atr1);
+					vkladany3 = najdi_v_tabulce(table, atr3);
+					if (vkladany1 == NULL || vkladany3 == NULL) return SYN_ERR;
+					if (vkladany1->defined == 0) return SYN_ERR;
+					if (vkladany3->defined == 0) return SYN_ERR;
+					if ((vkladany1->typ == INT_V || vkladany1->typ == DOUBLE_V) && (vkladany3->typ == INT_V || vkladany3->typ == DOUBLE_V)) type_var = 1;
+					else if (vkladany1->typ == STRING_V && vkladany3->typ == STRING_V) type_var = 1;
+					else return STYPE_ERR;
+					generateVariable(&atr2); //v atr2 je zarucene NULL
+					inicializuj_data(&vkladany2);
+					vkladany2->typ = type_var;
+					vkladany2->defined = 1;
+					vloz_do_tabulky(&table, atr2, vkladany2);
+					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID -> vkladany2 = vkladany 3 == vkladany 1
+					printf("GENEROVANA INSTRUKCE: %s = %s > %s\n", atr2, atr3, atr1);
 					pushPrc(ID, atr2, &PSAlist);
 					break;
 				default:
@@ -337,6 +435,8 @@ do{
 
 	terminalTop = topPrc(terminal_list);
 }while (nacteny != S_DOLAR || terminalTop != S_DOLAR);
+popPrc(&tok1, p_result, &PSAlist); // rozhodout se co budu chtit vracet??
+printf("posledni pop: %s\n", *p_result);
 return IS_OK;
 //navrat hodnoty na pop(PSAlist), tam bude ta promenna ve ktere je ulozeny vysledek vyrazu
 //konec PSA
@@ -344,20 +444,35 @@ return IS_OK;
 
 
 int prec_prevod(int* token, char** attrc){
+	tSymbolPtr vkladany;
 	switch(*token){
-		case INT_V:
+		case INT_V:;
+			int tmp_i;
 			//attr se prevede na int hodnotu
-			//hodnota se ulozi s unikatnim identifikatorem do lokalni tabulky (+ dalsi dulezite informace, jako ze je to int, ze je to promenna atd...)
-			//unikatni identifikator se zapise do attr
-			generateVariable(attrc);		
+			tmp_i = atoi(*attrc);
+			free(*attrc);
+			generateVariable(attrc);
+			inicializuj_data(&vkladany);
+			vkladany->typ = INT_V;
+			vkladany->defined = 1;
+			vkladany->value.i=tmp_i;
+			vloz_do_tabulky (&table, *attrc, vkladany);
+			//unikatni identifikator se zapise do attr	
 			//zmeni se hodnota tokenu na ID
 			*token = ID;
 			return S_ID;
-		case DOUBLE_V:
-			//attr se prevede na double hodnotu
-			//hodnota se ulozi s unikatnim identifikatorem do lokalni tabulky
-			//unikatni identifikator se zapise do attr
+		case DOUBLE_V:;
+			double tmp_d;
+			//attr se prevede na int hodnotu
+			tmp_d = atof(*attrc);
+			free(*attrc);
 			generateVariable(attrc);
+			inicializuj_data(&vkladany);
+			vkladany->typ = DOUBLE_V;
+			vkladany->defined = 1;
+			vkladany->value.d=tmp_d;
+			vloz_do_tabulky (&table, *attrc, vkladany);
+			//unikatni identifikator se zapise do attr	
 			//zmeni se hodnota tokenu na ID
 			*token = ID;
 			return S_ID;
@@ -693,11 +808,15 @@ int definice(tSymbolPtr funkce_v){
 			if (funkce_v->defined == 1) return SEM_ERR;
 			funkce_v->defined = 1;
 			//vytvorit instrukci label a dat ji definici funkci
-			//vytvorit lokalni tabulku a dat ji definici funkce
+			//funkcni label by mel byt asi jiny nez klasicky, aby vytvoril automaticky novou uroven a natahnul si tabulku
 			//vyskladat parametry do lokalni tabulky
+			load_params(funkce_v->parametry);
 			outcome = slozeny();
 			if (outcome != IS_OK) return outcome;
-			//uzavrit lokalni tabulku (ukazatel v parser.c = NULL)
+			print_koren_udu(table);
+			//dat ukazatel lokalni tabulky funkci
+			//NULL na ukazatel ve funkci lokalni tabulky (ukazatel v parser.c = NULL)
+			//label/znacka ukonceni funkce (pokud se na nej dojde, tak nastala chyba typu nenalezen return prikaz)
 			return IS_OK;
 			break;
 		case STREDNIK:
@@ -712,6 +831,7 @@ int definice(tSymbolPtr funkce_v){
 }
 
 int prikaz(){
+	char* ziskany = NULL;
 	/* PRIKAZ → PROMENNA strednik */
 	int outcome;
 	switch(token){
@@ -742,7 +862,7 @@ int prikaz(){
 			if (token != L_ZAVORKA) return SYN_ERR;
 			getToken
 			// expr
-			outcome = syntax_precedencka();
+			outcome = syntax_precedencka(&ziskany);
 			if (outcome != IS_OK) return outcome;
 			// expr dava nacteny dalsi token
 			if (token != P_ZAVORKA) return SYN_ERR;
@@ -765,7 +885,7 @@ int prikaz(){
 			if (token != STREDNIK) return SYN_ERR;
 			getToken
 			// expr
-			outcome = syntax_precedencka();
+			outcome = syntax_precedencka(&ziskany);
 			if (outcome != IS_OK) return outcome;
 			// expr dava nacteny dalsi token
 			if (token != STREDNIK) return SYN_ERR;
@@ -775,7 +895,7 @@ int prikaz(){
 			if (token != PRIRAZENI) return SYN_ERR;
 			getToken
 			// expr
-			outcome = syntax_precedencka();
+			outcome = syntax_precedencka(&ziskany);
 			if (outcome != IS_OK) return outcome;
 			// expr dava nacteny dalsi token
 			if (token != P_ZAVORKA) return SYN_ERR;
@@ -788,7 +908,7 @@ int prikaz(){
 		case RETURN:
 			getToken
 			// expr
-			outcome = syntax_precedencka();
+			outcome = syntax_precedencka(&ziskany);
 			if (outcome != IS_OK) return outcome;
 			// expr dava nacteny dalsi token
 			if (token != STREDNIK) return SYN_ERR;
@@ -820,6 +940,7 @@ int prikaz(){
 }
 
 int prirazeni(){	//case ID and id je jmeno funkce... na tomto nam bude padat kontrola
+	char* ziskany = NULL;
 	int outcome;
 	switch(token){
 		/* PRIRAZENI → id lz TERMY pz */
@@ -835,7 +956,7 @@ int prirazeni(){	//case ID and id je jmeno funkce... na tomto nam bude padat kon
 			break;
 		// case expresiion <<< PRIRAZENI → expr
 		default:
-			outcome = syntax_precedencka();
+			outcome = syntax_precedencka(&ziskany);
 			if (outcome != IS_OK) return outcome;
 			return IS_OK;
 			break;
@@ -919,6 +1040,9 @@ int dvypis(){
 int promenna(){
 	int outcome;
 	int typ_v;
+	char* nazev = NULL;
+	tSymbolPtr vkladany = NULL;
+	char* ziskany = NULL;
 	switch(token){
 		case INT:
 		case DOUBLE:
@@ -927,8 +1051,16 @@ int promenna(){
 			outcome = typ(&typ_v);
 			if (outcome != IS_OK) return outcome;
 			if (token != ID) return SYN_ERR;
+			string_from_char(&nazev, &attr);
+			if (najdi_v_tabulce (table, nazev)) return SEM_ERR;
+			inicializuj_data(&vkladany); //alokuje pamet a inicializuje hodnoty
+			vkladany->typ = typ_v;
+			vloz_do_tabulky (&table, nazev, vkladany);
 			getToken
-			outcome = prirad();
+			outcome = prirad(&ziskany);
+			printf("GENEROVANA INSTRUKCE: %s = %s\n", nazev, ziskany);
+			//vyresit s cim se a jak bude pracovat, nez bude vse napevno vecpano do tabuek!!!!!!!
+			//dale dulezite
 			if (outcome != IS_OK) return outcome;
 			return IS_OK;
 			break;
@@ -940,7 +1072,7 @@ int promenna(){
 			if (token != PRIRAZENI) return SYN_ERR;
 			getToken
 			//expression 
-			outcome = syntax_precedencka();
+			outcome = syntax_precedencka(&ziskany);//DODELAT
 			if (outcome != IS_OK) return outcome;
 			return IS_OK;
 			break;
@@ -950,14 +1082,13 @@ int promenna(){
 	}
 }
 
-int prirad(){
+int prirad(char **ziskany){
 	int outcome;
 	switch(token){
 		case PRIRAZENI:
 		/* PRIRAD → rovnitko expr */	
 			getToken
-			//expr
-			outcome = syntax_precedencka();
+			outcome = syntax_precedencka(ziskany);
 			if (outcome != IS_OK) return outcome;
 			return IS_OK;
 			break;
@@ -1043,4 +1174,18 @@ int term(){
 			return SYN_ERR;
 			break;
 	}
+}
+
+int load_params(param *parametry_v){
+	tSymbolPtr vkladany;
+	while(parametry_v != NULL){
+		vkladany = NULL;
+		if (najdi_v_tabulce(table, parametry_v->name) != NULL) return SEM_ERR;
+		inicializuj_data(&vkladany); //alokuje pamet a inicializuje hodnoty
+		vkladany->typ = parametry_v->typ;
+		vkladany->defined = 1;
+		vloz_do_tabulky (&table, parametry_v->name, vkladany);
+		parametry_v = parametry_v->next;
+	}
+	return IS_OK;
 }

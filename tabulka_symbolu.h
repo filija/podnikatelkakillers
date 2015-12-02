@@ -15,7 +15,7 @@ typedef struct SymbolTable *uk_uzel;
 typedef union
 {
     int i;
-    float f;
+    double d;
     char *s;
 } uObsah;
 
@@ -31,7 +31,7 @@ struct sym   // symbol
 //    char *symbol;       // nazev promenne
     int typ;    // datovy typ symbolu 0 = nedef, 1 = int, 2 = double, 3 = string, 4 = auto
     int verze;         // 1 funkce 0 promenna
-    uObsah value;        // obsah int, float, string
+    uObsah value;        // obsah int, double, string
     param *parametry; // typy a jmena parametru
     int defined; // 1 ano, 0 ne
     uk_uzel tabulka; // ukazatel na tabulku - glob ->lok
