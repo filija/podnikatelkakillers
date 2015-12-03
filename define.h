@@ -46,7 +46,7 @@
 #define AUTO_ERR		-5
 #define SOTHERS_ERR		-6 // jina sem chyba
 #define CIN_ERR			-7
-#define NONINV_ERR		-8 // neinicializovana promenna
+#define NONINC_ERR		-8 // neinicializovana promenna
 #define DIVZERO_ERR		-9 // deleni nulou
 #define ROTHERS_ERR		-10 // ostatni behove chyby
 #define INTERNAL_ERR	-99

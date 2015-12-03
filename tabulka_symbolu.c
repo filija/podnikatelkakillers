@@ -11,6 +11,7 @@ void inicializuj_tabulku(uk_uzel *Koren) { // inicializace stromu
 int inicializuj_data(tSymbolPtr *symbol){
 	tSymbolPtr help_ptr = malloc(sizeof(struct sym));
 	if (help_ptr == NULL) return INTERNAL_ERR;
+	help_ptr->symbol = NULL;
 	help_ptr->typ = 0;
 	help_ptr->verze = 0;
 	help_ptr->parametry = NULL;
@@ -66,6 +67,7 @@ int vloz_do_tabulky(uk_uzel *Koren, char *K, tSymbolPtr data)	{	// vlozi data s 
 			return INTERNAL_ERR;
 		}
 		help_ptr->symbol = K;
+		data->symbol = K;
 		help_ptr->data = data;
 		help_ptr->LPtr = NULL;
 		help_ptr->RPtr = NULL;
@@ -174,4 +176,52 @@ int zkontroluj_parametry(param *parametr, tSymbolPtr data){
 		parametr = parametr->next;
 		tmp=tmp->next;
 	}
+}
+
+int push_tstack(tStackPtr *stack, uk_uzel tabulka, int zarazka){
+	if (*stack == NULL){
+		*stack =  malloc(sizeof(struct ZasobnikTabulek));
+		if (*stack != NULL){
+			(*stack)->tabulka = tabulka;
+			(*stack)->zarazka = zarazka;
+			(*stack)->next = NULL;
+			return IS_OK;
+		}
+		return INTERNAL_ERR;
+	}
+	tStackPtr tmpstack = malloc(sizeof(struct ZasobnikTabulek));
+	if (tmpstack!=NULL){
+		tmpstack->tabulka = tabulka;
+		tmpstack->zarazka = zarazka;
+		tmpstack->next = *stack;
+		*stack = tmpstack;
+		return IS_OK;
+	}
+	return INTERNAL_ERR;
+}
+int pop_tstack(tStackPtr *stack){
+	if (*stack == NULL) return INTERNAL_ERR;
+	tStackPtr tmpstack;
+	tmpstack = (*stack)->next;
+	free(*stack);
+	*stack = tmpstack;
+	return IS_OK;
+}
+
+tSymbolPtr find_tstack(tStackPtr stack, char* name){
+	tSymbolPtr result;
+	while (stack != NULL){
+		result = najdi_v_tabulce(stack->tabulka, name);
+		if (result != NULL) return result;
+		else{
+			if (stack->zarazka == 1) return NULL;
+				stack = stack->next;
+		}
+	}
+	return NULL;
+}
+
+int insert_tstack(tStackPtr stack, char *K, tSymbolPtr data){
+	if (stack == NULL) return INTERNAL_ERR;
+	return vloz_do_tabulky(&(stack->tabulka), K, data);
 }

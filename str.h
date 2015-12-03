@@ -24,4 +24,4 @@ int strGetLength(string *s);
 void string_from_char(char **ch, string *s);
 int charDup(char **output, char *input);
 
-#endif /* GRANDFATHER_H */
+#endif /* STR_H */

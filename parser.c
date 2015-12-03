@@ -4,7 +4,7 @@
 
 int token;
 int countVar = 0;
-uk_uzel table = NULL;
+tStackPtr table = NULL;
 uk_uzel global_table = NULL;
 // ptrStack stack;
 string attr;
@@ -31,7 +31,7 @@ tSymbolPtr data; // data prubezna
 
 void print_koren_udu(uk_uzel tabulka){
 	if(tabulka == NULL) return;
-	printf("Jmeno a hodnota(int) je >>> %s %i\n", tabulka->symbol, tabulka->data->value.i);
+	printf("Jmeno a hodnota(int) je >>> %s %i %f\n", tabulka->symbol, tabulka->data->value.i, tabulka->data->value.d);
 	print_koren_udu(tabulka->LPtr);
 	print_koren_udu(tabulka->RPtr);
 }
@@ -172,11 +172,11 @@ do{
 					if(tok1 != ID) return SYN_ERR;
 					if(tok2 != PLUS) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR;
-					vkladany1 = najdi_v_tabulce(table, atr1);
-					vkladany3 = najdi_v_tabulce(table, atr3);
+					vkladany1 = find_tstack(table, atr1);
+					vkladany3 = find_tstack(table, atr3);
 					if (vkladany1 == NULL || vkladany3 == NULL) return SYN_ERR;
-					if (vkladany1->defined == 0) return SYN_ERR;
-					if (vkladany3->defined == 0) return SYN_ERR;
+					if (vkladany1->defined == 0) return NONINC_ERR;
+					if (vkladany3->defined == 0) return NONINC_ERR;
 					if (vkladany1->typ == INT_V && vkladany3->typ == INT_V) type_var = 1;
 					else if (vkladany1->typ == DOUBLE_V && vkladany3->typ == DOUBLE_V) type_var = 2;
 					else if (vkladany1->typ == DOUBLE_V && vkladany3->typ == INT_V) type_var = 2;
@@ -186,7 +186,7 @@ do{
 					inicializuj_data(&vkladany2);
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
-					vloz_do_tabulky(&table, atr2, vkladany2);
+					insert_tstack(table, atr2, vkladany2);
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID -> vkladany2 = vkladany 3 - vkladany 1
 					printf("GENEROVANA INSTRUKCE: %s = %s + %s\n", atr2, atr3, atr1);
 					pushPrc(ID, atr2, &PSAlist);
@@ -199,11 +199,11 @@ do{
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != MINUS) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-					vkladany1 = najdi_v_tabulce(table, atr1);
-					vkladany3 = najdi_v_tabulce(table, atr3);
+					vkladany1 = find_tstack(table, atr1);
+					vkladany3 = find_tstack(table, atr3);
 					if (vkladany1 == NULL || vkladany3 == NULL) return SYN_ERR;
-					if (vkladany1->defined == 0) return SYN_ERR;
-					if (vkladany3->defined == 0) return SYN_ERR;
+					if (vkladany1->defined == 0) return NONINC_ERR;
+					if (vkladany3->defined == 0) return NONINC_ERR;
 					if (vkladany1->typ == INT_V && vkladany3->typ == INT_V) type_var = 1;
 					else if (vkladany1->typ == DOUBLE_V && vkladany3->typ == DOUBLE_V) type_var = 2;
 					else if (vkladany1->typ == DOUBLE_V && vkladany3->typ == INT_V) type_var = 2;
@@ -213,7 +213,7 @@ do{
 					inicializuj_data(&vkladany2);
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
-					vloz_do_tabulky(&table, atr2, vkladany2);
+					insert_tstack(table, atr2, vkladany2);
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID -> vkladany2 = vkladany 3 - vkladany 1
 					printf("GENEROVANA INSTRUKCE: %s = %s - %s\n", atr2, atr3, atr1);
 					pushPrc(ID, atr2, &PSAlist);
@@ -226,11 +226,11 @@ do{
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != NASOBENI) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-					vkladany1 = najdi_v_tabulce(table, atr1);
-					vkladany3 = najdi_v_tabulce(table, atr3);
+					vkladany1 = find_tstack(table, atr1);
+					vkladany3 = find_tstack(table, atr3);
 					if (vkladany1 == NULL || vkladany3 == NULL) return SYN_ERR;
-					if (vkladany1->defined == 0) return SYN_ERR;
-					if (vkladany3->defined == 0) return SYN_ERR;
+					if (vkladany1->defined == 0) return NONINC_ERR;
+					if (vkladany3->defined == 0) return NONINC_ERR;
 					if (vkladany1->typ == INT_V && vkladany3->typ == INT_V) type_var = 1;
 					else if (vkladany1->typ == DOUBLE_V && vkladany3->typ == DOUBLE_V) type_var = 2;
 					else if (vkladany1->typ == DOUBLE_V && vkladany3->typ == INT_V) type_var = 2;
@@ -240,7 +240,7 @@ do{
 					inicializuj_data(&vkladany2);
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
-					vloz_do_tabulky(&table, atr2, vkladany2);
+					insert_tstack(table, atr2, vkladany2);
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID -> vkladany2 = vkladany 3 * vkladany 1
 					printf("GENEROVANA INSTRUKCE: %s = %s * %s\n", atr2, atr3, atr1);
 					pushPrc(ID, atr2, &PSAlist);
@@ -253,11 +253,11 @@ do{
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != DELENI) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-					vkladany1 = najdi_v_tabulce(table, atr1);
-					vkladany3 = najdi_v_tabulce(table, atr3);
+					vkladany1 = find_tstack(table, atr1);
+					vkladany3 = find_tstack(table, atr3);
 					if (vkladany1 == NULL || vkladany3 == NULL) return SYN_ERR;
-					if (vkladany1->defined == 0) return SYN_ERR;
-					if (vkladany3->defined == 0) return SYN_ERR;
+					if (vkladany1->defined == 0) return NONINC_ERR;
+					if (vkladany3->defined == 0) return NONINC_ERR;
 					if (vkladany1->typ == INT_V && vkladany3->typ == INT_V) type_var = 1;
 					else if (vkladany1->typ == DOUBLE_V && vkladany3->typ == DOUBLE_V) type_var = 2;
 					else if (vkladany1->typ == DOUBLE_V && vkladany3->typ == INT_V) type_var = 2;
@@ -267,7 +267,7 @@ do{
 					inicializuj_data(&vkladany2);
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
-					vloz_do_tabulky(&table, atr2, vkladany2);
+					insert_tstack(table, atr2, vkladany2);
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID -> vkladany2 = vkladany 3 / vkladany 1
 					printf("GENEROVANA INSTRUKCE: %s = %s / %s\n", atr2, atr3, atr1);
 					pushPrc(ID, atr2, &PSAlist);
@@ -280,11 +280,11 @@ do{
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != ROVNA_SE) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-					vkladany1 = najdi_v_tabulce(table, atr1);
-					vkladany3 = najdi_v_tabulce(table, atr3);
+					vkladany1 = find_tstack(table, atr1);
+					vkladany3 = find_tstack(table, atr3);
 					if (vkladany1 == NULL || vkladany3 == NULL) return SYN_ERR;
-					if (vkladany1->defined == 0) return SYN_ERR;
-					if (vkladany3->defined == 0) return SYN_ERR;
+					if (vkladany1->defined == 0) return NONINC_ERR;
+					if (vkladany3->defined == 0) return NONINC_ERR;
 					if ((vkladany1->typ == INT_V || vkladany1->typ == DOUBLE_V) && (vkladany3->typ == INT_V || vkladany3->typ == DOUBLE_V)) type_var = 1;
 					else if (vkladany1->typ == STRING_V && vkladany3->typ == STRING_V) type_var = 1;
 					else return STYPE_ERR;
@@ -292,7 +292,7 @@ do{
 					inicializuj_data(&vkladany2);
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
-					vloz_do_tabulky(&table, atr2, vkladany2);
+					insert_tstack(table, atr2, vkladany2);
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID -> vkladany2 = vkladany 3 == vkladany 1
 					printf("GENEROVANA INSTRUKCE: %s = %s == %s\n", atr2, atr3, atr1);
 					pushPrc(ID, atr2, &PSAlist);
@@ -305,11 +305,11 @@ do{
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != MENE_NEBO_ROVNO) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-					vkladany1 = najdi_v_tabulce(table, atr1);
-					vkladany3 = najdi_v_tabulce(table, atr3);
+					vkladany1 = find_tstack(table, atr1);
+					vkladany3 = find_tstack(table, atr3);
 					if (vkladany1 == NULL || vkladany3 == NULL) return SYN_ERR;
-					if (vkladany1->defined == 0) return SYN_ERR;
-					if (vkladany3->defined == 0) return SYN_ERR;
+					if (vkladany1->defined == 0) return NONINC_ERR;
+					if (vkladany3->defined == 0) return NONINC_ERR;
 					if ((vkladany1->typ == INT_V || vkladany1->typ == DOUBLE_V) && (vkladany3->typ == INT_V || vkladany3->typ == DOUBLE_V)) type_var = 1;
 					else if (vkladany1->typ == STRING_V && vkladany3->typ == STRING_V) type_var = 1;
 					else return STYPE_ERR;
@@ -317,7 +317,7 @@ do{
 					inicializuj_data(&vkladany2);
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
-					vloz_do_tabulky(&table, atr2, vkladany2);
+					insert_tstack(table, atr2, vkladany2);
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID -> vkladany2 = vkladany 3 == vkladany 1
 					printf("GENEROVANA INSTRUKCE: %s = %s <= %s\n", atr2, atr3, atr1);
 					pushPrc(ID, atr2, &PSAlist);
@@ -330,11 +330,11 @@ do{
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != MENE) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-					vkladany1 = najdi_v_tabulce(table, atr1);
-					vkladany3 = najdi_v_tabulce(table, atr3);
+					vkladany1 = find_tstack(table, atr1);
+					vkladany3 = find_tstack(table, atr3);
 					if (vkladany1 == NULL || vkladany3 == NULL) return SYN_ERR;
-					if (vkladany1->defined == 0) return SYN_ERR;
-					if (vkladany3->defined == 0) return SYN_ERR;
+					if (vkladany1->defined == 0) return NONINC_ERR;
+					if (vkladany3->defined == 0) return NONINC_ERR;
 					if ((vkladany1->typ == INT_V || vkladany1->typ == DOUBLE_V) && (vkladany3->typ == INT_V || vkladany3->typ == DOUBLE_V)) type_var = 1;
 					else if (vkladany1->typ == STRING_V && vkladany3->typ == STRING_V) type_var = 1;
 					else return STYPE_ERR;
@@ -342,7 +342,7 @@ do{
 					inicializuj_data(&vkladany2);
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
-					vloz_do_tabulky(&table, atr2, vkladany2);
+					insert_tstack(table, atr2, vkladany2);
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID -> vkladany2 = vkladany 3 == vkladany 1
 					printf("GENEROVANA INSTRUKCE: %s = %s < %s\n", atr2, atr3, atr1);
 					pushPrc(ID, atr2, &PSAlist);
@@ -355,11 +355,11 @@ do{
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != NEROVNOST) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-					vkladany1 = najdi_v_tabulce(table, atr1);
-					vkladany3 = najdi_v_tabulce(table, atr3);
+					vkladany1 = find_tstack(table, atr1);
+					vkladany3 = find_tstack(table, atr3);
 					if (vkladany1 == NULL || vkladany3 == NULL) return SYN_ERR;
-					if (vkladany1->defined == 0) return SYN_ERR;
-					if (vkladany3->defined == 0) return SYN_ERR;
+					if (vkladany1->defined == 0) return NONINC_ERR;
+					if (vkladany3->defined == 0) return NONINC_ERR;
 					if ((vkladany1->typ == INT_V || vkladany1->typ == DOUBLE_V) && (vkladany3->typ == INT_V || vkladany3->typ == DOUBLE_V)) type_var = 1;
 					else if (vkladany1->typ == STRING_V && vkladany3->typ == STRING_V) type_var = 1;
 					else return STYPE_ERR;
@@ -367,7 +367,7 @@ do{
 					inicializuj_data(&vkladany2);
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
-					vloz_do_tabulky(&table, atr2, vkladany2);
+					insert_tstack(table, atr2, vkladany2);
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID -> vkladany2 = vkladany 3 == vkladany 1
 					printf("GENEROVANA INSTRUKCE: %s = %s != %s\n", atr2, atr3, atr1);
 					pushPrc(ID, atr2, &PSAlist);
@@ -380,11 +380,11 @@ do{
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != VICE_NEBO_ROVNO) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-					vkladany1 = najdi_v_tabulce(table, atr1);
-					vkladany3 = najdi_v_tabulce(table, atr3);
+					vkladany1 = find_tstack(table, atr1);
+					vkladany3 = find_tstack(table, atr3);
 					if (vkladany1 == NULL || vkladany3 == NULL) return SYN_ERR;
-					if (vkladany1->defined == 0) return SYN_ERR;
-					if (vkladany3->defined == 0) return SYN_ERR;
+					if (vkladany1->defined == 0) return NONINC_ERR;
+					if (vkladany3->defined == 0) return NONINC_ERR;
 					if ((vkladany1->typ == INT_V || vkladany1->typ == DOUBLE_V) && (vkladany3->typ == INT_V || vkladany3->typ == DOUBLE_V)) type_var = 1;
 					else if (vkladany1->typ == STRING_V && vkladany3->typ == STRING_V) type_var = 1;
 					else return STYPE_ERR;
@@ -392,7 +392,7 @@ do{
 					inicializuj_data(&vkladany2);
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
-					vloz_do_tabulky(&table, atr2, vkladany2);
+					insert_tstack(table, atr2, vkladany2);
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID -> vkladany2 = vkladany 3 == vkladany 1
 					printf("GENEROVANA INSTRUKCE: %s = %s >= %s\n", atr2, atr3, atr1);
 					pushPrc(ID, atr2, &PSAlist);
@@ -405,11 +405,11 @@ do{
 					if(tok1 != ID) return SYN_ERR; //nejaka chyba
 					if(tok2 != VICE) return SYN_ERR;
 					if(tok3 != ID) return SYN_ERR; //nejaka chyba
-					vkladany1 = najdi_v_tabulce(table, atr1);
-					vkladany3 = najdi_v_tabulce(table, atr3);
+					vkladany1 = find_tstack(table, atr1);
+					vkladany3 = find_tstack(table, atr3);
 					if (vkladany1 == NULL || vkladany3 == NULL) return SYN_ERR;
-					if (vkladany1->defined == 0) return SYN_ERR;
-					if (vkladany3->defined == 0) return SYN_ERR;
+					if (vkladany1->defined == 0) return NONINC_ERR;
+					if (vkladany3->defined == 0) return NONINC_ERR;
 					if ((vkladany1->typ == INT_V || vkladany1->typ == DOUBLE_V) && (vkladany3->typ == INT_V || vkladany3->typ == DOUBLE_V)) type_var = 1;
 					else if (vkladany1->typ == STRING_V && vkladany3->typ == STRING_V) type_var = 1;
 					else return STYPE_ERR;
@@ -417,7 +417,7 @@ do{
 					inicializuj_data(&vkladany2);
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
-					vloz_do_tabulky(&table, atr2, vkladany2);
+					insert_tstack(table, atr2, vkladany2);
 					// vygenerovat instrukci, ktera provede vygenerovana = ID + ID -> vkladany2 = vkladany 3 == vkladany 1
 					printf("GENEROVANA INSTRUKCE: %s = %s > %s\n", atr2, atr3, atr1);
 					pushPrc(ID, atr2, &PSAlist);
@@ -456,7 +456,7 @@ int prec_prevod(int* token, char** attrc){
 			vkladany->typ = INT_V;
 			vkladany->defined = 1;
 			vkladany->value.i=tmp_i;
-			vloz_do_tabulky (&table, *attrc, vkladany);
+			insert_tstack (table, *attrc, vkladany);
 			//unikatni identifikator se zapise do attr	
 			//zmeni se hodnota tokenu na ID
 			*token = ID;
@@ -471,7 +471,7 @@ int prec_prevod(int* token, char** attrc){
 			vkladany->typ = DOUBLE_V;
 			vkladany->defined = 1;
 			vkladany->value.d=tmp_d;
-			vloz_do_tabulky (&table, *attrc, vkladany);
+			insert_tstack (table, *attrc, vkladany);
 			//unikatni identifikator se zapise do attr	
 			//zmeni se hodnota tokenu na ID
 			*token = ID;
@@ -516,11 +516,10 @@ int prec_prevod(int* token, char** attrc){
 }
 
 /*Hlavni funkce parseru*/
-//int parse(struct symbol_table* table_hl, tList *list, ptrStack stack_hl){
+//int parse(struct symbol_table* table_hl, tList *list){
 int parse(uk_uzel *GT){ 
   int result;
   global_table = *GT;/*Nastaveni tabulky*/
-//  Stack = stack_hl;/*Nastaveni zasobniku*/
   strInit(&attr);
   
 //  LS = list;/*Nastaveni listu*/
@@ -537,6 +536,7 @@ int parse(uk_uzel *GT){
     free(str_parameters);
     }	
   */
+
   return result;
 }
 
@@ -629,7 +629,7 @@ int deklarace(tSymbolPtr *funkce_v){
 			if (outcome != IS_OK) return outcome;
 			if (token != P_ZAVORKA) return SYN_ERR;
 			tSymbolPtr hledany;
-			hledany = najdi_v_tabulce (global_table, nazev);
+			hledany = najdi_v_tabulce(global_table, nazev);
 			if (hledany != NULL){
 				if (hledany->typ != typ_v) return SEM_ERR;
 				outcome = zkontroluj_parametry(parametry_v, hledany);
@@ -640,7 +640,7 @@ int deklarace(tSymbolPtr *funkce_v){
 				hledany->typ = typ_v;
 				hledany->verze = 1;
 				hledany->parametry = parametry_v;
-				vloz_do_tabulky (&global_table, nazev, hledany);
+				vloz_do_tabulky(&global_table, nazev, hledany);
 			}
 			*funkce_v = hledany;
 			getToken
@@ -807,16 +807,20 @@ int definice(tSymbolPtr funkce_v){
 		case LS_ZAVORKA:
 			if (funkce_v->defined == 1) return SEM_ERR;
 			funkce_v->defined = 1;
+			push_tstack(&table, NULL, 1);
+			printf("GENEROVANA LABELU FUNKCE: %s\n", funkce_v->symbol);
 			//vytvorit instrukci label a dat ji definici funkci
-			//funkcni label by mel byt asi jiny nez klasicky, aby vytvoril automaticky novou uroven a natahnul si tabulku
+			//funkcni label by mel byt asi jiny nez klasicky, aby vytvoril automaticky novou uroven a natahnul si tabulku -> bude resit CALL!
 			//vyskladat parametry do lokalni tabulky
-			load_params(funkce_v->parametry);
+			outcome = load_params(funkce_v->parametry);
+			if (outcome != IS_OK) return outcome;
 			outcome = slozeny();
 			if (outcome != IS_OK) return outcome;
-			print_koren_udu(table);
-			//dat ukazatel lokalni tabulky funkci
-			//NULL na ukazatel ve funkci lokalni tabulky (ukazatel v parser.c = NULL)
+			funkce_v->tabulka = table->tabulka;
+			print_koren_udu(funkce_v->tabulka);
+			pop_tstack(&table);
 			//label/znacka ukonceni funkce (pokud se na nej dojde, tak nastala chyba typu nenalezen return prikaz)
+			printf("GENEROVANI CHYBOVEHO LABELU PRO FUNKCE \n");
 			return IS_OK;
 			break;
 		case STREDNIK:
@@ -832,6 +836,12 @@ int definice(tSymbolPtr funkce_v){
 
 int prikaz(){
 	char* ziskany = NULL;
+	tSymbolPtr p_ziskany = NULL;
+	tSymbolPtr p_prirazeny = NULL;
+	char *label1 = NULL;
+	char *label2 = NULL;
+	char *label3 = NULL;
+	tSymbolPtr p_label = NULL;
 	/* PRIKAZ → PROMENNA strednik */
 	int outcome;
 	switch(token){
@@ -847,11 +857,17 @@ int prikaz(){
 			break;
 		/* PRIKAZ → id rovnitko PRIRAZENI strednik */
 		case ID:
+			p_prirazeny = find_tstack(table, attr.str);
+			if (p_prirazeny == NULL) return SEM_ERR;
 			getToken
 			if (token != PRIRAZENI) return SYN_ERR;			
 			getToken
-			outcome = prirazeni();
+			outcome = prirazeni(&ziskany);
 			if (outcome != IS_OK) return outcome;
+			p_ziskany = find_tstack (table, ziskany);	//potrebujeme najit datovy typ promenne
+			if ((p_ziskany->typ == STRING_V && p_prirazeny->typ != STRING_V) || (p_ziskany->typ != STRING_V && p_prirazeny->typ == STRING_V)) return STYPE_ERR;
+			p_prirazeny->defined = 1;
+			printf("GENEROVANA INSTRUKCE: %s = %s\n", p_prirazeny->symbol, p_ziskany->symbol);
 			if (token != STREDNIK) return SYN_ERR;
 			getToken
 			return IS_OK;
@@ -861,18 +877,47 @@ int prikaz(){
 			getToken
 			if (token != L_ZAVORKA) return SYN_ERR;
 			getToken
-			// expr
 			outcome = syntax_precedencka(&ziskany);
 			if (outcome != IS_OK) return outcome;
-			// expr dava nacteny dalsi token
 			if (token != P_ZAVORKA) return SYN_ERR;
+			p_ziskany = find_tstack (table, ziskany);
+			if (!(p_ziskany->typ == INT_V || p_ziskany->typ == DOUBLE_V)) return STYPE_ERR;
+			generateVariable(&label1);
+			printf("GENEROVANA INSTRUKCE: JUMP ON 0 podminka: %s kam: %s\n", p_ziskany->symbol, label1);
+			generateVariable(&label2);
+			printf("GENEROVANA INSTRUKCE: LABEL WITH PUSH (work table) %s\n", label2);
+			inicializuj_data(&p_label);
+			//vloz adresu labelu do dat
+			push_tstack(&table, NULL, 0);
 			getToken
 			outcome = slozeny();
 			if (outcome != IS_OK) return outcome;
+			p_label->tabulka = table->tabulka;
+			print_koren_udu(p_label->tabulka);
+			pop_tstack(&table);
+			insert_tstack(table, label2, p_label);
+			printf("GENEROVANA INSTRUKCE: POP TABLE\n");
+			generateVariable(&label3);
+			printf("GENEROVANA INSTRUKCE: JUMP %s\n", label3);
+			p_label = NULL;
 			if (token != ELSE) return SYN_ERR;
+			printf("GENEROVANA INSTRUKCE: LABEL WITH PUSH (work table) %s\n", label1);
+			inicializuj_data(&p_label);
+			//vloz adresu labelu do dat
+			push_tstack(&table, NULL, 0);
 			getToken
 			outcome = slozeny();
 			if (outcome != IS_OK) return outcome;
+			p_label->tabulka = table->tabulka;
+			print_koren_udu(p_label->tabulka);
+			pop_tstack(&table);
+			insert_tstack(table, label1, p_label);
+			printf("GENEROVANA INSTRUKCE: POP TABLE\n");
+			printf("GENEROVANA INSTRUKCE: LABEL %s\n", label3);
+			p_label = NULL;
+			inicializuj_data(&p_label);
+			//vloz adresu labelu do dat
+			insert_tstack(table, label3, p_label);
 			return IS_OK;
 			break;
 		/* PRIKAZ → for lz PROMENNA strednik expr strednik id rovnitko expr pz SLOZENY */
@@ -939,24 +984,38 @@ int prikaz(){
 	}
 }
 
-int prirazeni(){	//case ID and id je jmeno funkce... na tomto nam bude padat kontrola
-	char* ziskany = NULL;
+int prirazeni(char **ziskany){	//case ID and id je jmeno funkce... na tomto nam bude padat kontrola
 	int outcome;
+	tSymbolPtr p_ziskany = NULL;
+
+
 	switch(token){
 		/* PRIRAZENI → id lz TERMY pz */
 		case ID:
-			getToken
-			if (token != L_ZAVORKA) return SYN_ERR;
-			getToken
-			outcome = termy();
-			if (outcome != IS_OK) return outcome;
-			if (token != P_ZAVORKA) return SYN_ERR;
-			getToken
-			return IS_OK;
-			break;
+			if (find_tstack(table, attr.str) == NULL){
+				p_ziskany = najdi_v_tabulce(global_table, attr.str);
+				//dodelat obsluhu callu, tedy napushovat co je v termech a pak az volat CALL a za CALLem vytahnout do promenne vysledek
+				if (p_ziskany == NULL) return SEM_ERR;
+				getToken
+				if (token != L_ZAVORKA) return SYN_ERR;
+				getToken
+				outcome = termy(p_ziskany->parametry);
+				if (outcome != IS_OK) return outcome;
+				printf("GENEROVANA INSTRUKCE: CALL %s\n", p_ziskany->symbol);
+				generateVariable(ziskany);
+				tSymbolPtr p_mezivysledek;
+				inicializuj_data(&p_mezivysledek);
+				p_mezivysledek->typ = p_ziskany->typ;
+				p_mezivysledek->defined = 1;
+				insert_tstack(table, *ziskany, p_mezivysledek);
+				printf("GENEROVANA INSTRUKCE: POP INTO %s\n", *ziskany);
+				if (token != P_ZAVORKA) return SYN_ERR;
+				getToken
+				return IS_OK;
+			}
 		// case expresiion <<< PRIRAZENI → expr
 		default:
-			outcome = syntax_precedencka(&ziskany);
+			outcome = syntax_precedencka(ziskany);
 			if (outcome != IS_OK) return outcome;
 			return IS_OK;
 			break;
@@ -1002,11 +1061,12 @@ int dnacteni(){
 
 int vypis(){
 	int outcome;
+	char *ziskany;
 	switch(token){
 		/* VYPIS → pis TERM DVYPIS */
 		case ZAPIS:
 			getToken
-			outcome = term();
+			outcome = term(&ziskany);
 			if (outcome != IS_OK) return outcome;
 			outcome = dvypis();
 			if (outcome != IS_OK) return outcome;
@@ -1042,6 +1102,7 @@ int promenna(){
 	int typ_v;
 	char* nazev = NULL;
 	tSymbolPtr vkladany = NULL;
+	tSymbolPtr p_ziskany = NULL;
 	char* ziskany = NULL;
 	switch(token){
 		case INT:
@@ -1052,28 +1113,39 @@ int promenna(){
 			if (outcome != IS_OK) return outcome;
 			if (token != ID) return SYN_ERR;
 			string_from_char(&nazev, &attr);
-			if (najdi_v_tabulce (table, nazev)) return SEM_ERR;
+			if (najdi_v_tabulce (table->tabulka, nazev) != NULL) return SEM_ERR;
 			inicializuj_data(&vkladany); //alokuje pamet a inicializuje hodnoty
 			vkladany->typ = typ_v;
-			vloz_do_tabulky (&table, nazev, vkladany);
+			insert_tstack (table, nazev, vkladany);
 			getToken
 			outcome = prirad(&ziskany);
-			printf("GENEROVANA INSTRUKCE: %s = %s\n", nazev, ziskany);
-			//vyresit s cim se a jak bude pracovat, nez bude vse napevno vecpano do tabuek!!!!!!!
-			//dale dulezite
 			if (outcome != IS_OK) return outcome;
+			if (ziskany != NULL){	//pokud byl vyraz a ne strednik
+				p_ziskany = find_tstack (table, ziskany);	//potrebujeme najit datovy typ promenne
+				if ((p_ziskany->typ == STRING_V && vkladany->typ != STRING_V) || (p_ziskany->typ != STRING_V && vkladany->typ == STRING_V)) return STYPE_ERR;
+				vkladany->defined = 1;
+				printf("GENEROVANA INSTRUKCE: %s = %s\n", nazev, ziskany);	//je potreba zkontrolovat jen spravne prirazeni o vse ostatni se postaraji funkce drive
+			}
 			return IS_OK;
 			break;
 		case AUTO:
 		 /* PROMENNA → auto id rovnitko expr */
 			getToken
 			if (token != ID) return SYN_ERR;
+			string_from_char(&nazev, &attr);
+			if (najdi_v_tabulce (table->tabulka, nazev) != NULL) return SEM_ERR;
+			inicializuj_data(&vkladany); //alokuje pamet a inicializuje hodnoty
+			vkladany->defined = 1;
+			insert_tstack (table, nazev, vkladany);
 			getToken
-			if (token != PRIRAZENI) return SYN_ERR;
+			if (token != PRIRAZENI) return AUTO_ERR;
 			getToken
-			//expression 
-			outcome = syntax_precedencka(&ziskany);//DODELAT
+			outcome = syntax_precedencka(&ziskany);//DODELAT?
 			if (outcome != IS_OK) return outcome;
+			p_ziskany = find_tstack (table, ziskany);	//potrebujeme najit datovy typ promenne
+			vkladany->typ = p_ziskany->typ;
+			printf("typy: %i %i\n", p_ziskany->typ, vkladany->typ);
+			printf("GENEROVANA INSTRUKCE: %s = %s\n", nazev, ziskany);
 			return IS_OK;
 			break;
 		default:
@@ -1102,21 +1174,28 @@ int prirad(char **ziskany){
 	}
 }
 
-int termy(){
+int termy(param *parametry_f){
 	int outcome;
+	char* ziskany;
+	tSymbolPtr p_ziskany = NULL;
 	switch(token){
 		/* TERMY → TERM DTERM */
 		case ID:
 		case INT_V:
 		case DOUBLE_V:
 		case STRING_V:
-			outcome = term();
+			if (parametry_f == NULL) return STYPE_ERR;
+			outcome = term(&ziskany);
 			if (outcome != IS_OK) return outcome;
-			outcome = dterm();
+			p_ziskany = find_tstack (table, ziskany);
+			if (p_ziskany->typ != parametry_f->typ) return STYPE_ERR;
+			printf("GENEROVANA INSTRUKCE: PUSH %s\n", ziskany);
+			outcome = dterm(parametry_f->next);
 			if (outcome != IS_OK) return outcome;
 			return IS_OK;
 			break;
 		case P_ZAVORKA:
+			if (parametry_f != NULL) return STYPE_ERR;
 		/* TERMY → ε */
 			return IS_OK;
 			break;
@@ -1126,19 +1205,26 @@ int termy(){
 	}
 }
 
-int dterm(){
+int dterm(param *parametry_f){
 	int outcome;
+	char* ziskany;
+	tSymbolPtr p_ziskany = NULL;
+		/* DTERM → ε */
 	switch(token){
 		case P_ZAVORKA:
-		/* DTERM → ε */
+			if (parametry_f != NULL) return STYPE_ERR;
 			return IS_OK;
 			break;
 		/* DTERM → carka TERM DTERM */
 		case CARKA:
 			getToken
-			outcome = term();
+			if (parametry_f == NULL) return STYPE_ERR;
+			outcome = term(&ziskany);
 			if (outcome != IS_OK) return outcome;
-			outcome = dterm();
+			p_ziskany = find_tstack (table, ziskany);
+			if (p_ziskany->typ != parametry_f->typ) return STYPE_ERR;
+			printf("GENEROVANA INSTRUKCE: PUSH %s\n", ziskany);
+			outcome = dterm(parametry_f->next);
 			if (outcome != IS_OK) return outcome;
 			return IS_OK;
 			break;
@@ -1148,20 +1234,41 @@ int dterm(){
 	}
 }
 
-int term(){
+int term(char **ziskany){
 	switch(token){
+		tSymbolPtr p_ziskany = NULL;
 		/* TERM → id */
 		case ID:
+			p_ziskany = find_tstack (table, attr.str);
+			if (p_ziskany->defined == 0) return SEM_ERR;
+			*ziskany = p_ziskany->symbol;
 			getToken
 			return IS_OK;
 			break;
-		case INT_V:
+		case INT_V:;
+			int tmp_i;
+			tmp_i = atoi(attr.str);
+			generateVariable(ziskany);
+			inicializuj_data(&p_ziskany);
+			p_ziskany->typ = INT_V;
+			p_ziskany->defined = 1;
+			p_ziskany->value.i=tmp_i;
+			insert_tstack (table, *ziskany, p_ziskany);
+			//unikatni identifikator se zapise do attr	
 			/* TERM → literal */
 			getToken
 			return IS_OK;
 			break;
-		case DOUBLE_V:
-			/* TERM → literal */
+		case DOUBLE_V:;
+			double tmp_d;
+			//attr se prevede na int hodnotu
+			tmp_d = atof(attr.str);
+			generateVariable(ziskany);
+			inicializuj_data(&p_ziskany);
+			p_ziskany->typ = DOUBLE_V;
+			p_ziskany->defined = 1;
+			p_ziskany->value.d=tmp_d;
+			insert_tstack (table, *ziskany, p_ziskany);
 			getToken
 			return IS_OK;
 			break;
@@ -1180,11 +1287,12 @@ int load_params(param *parametry_v){
 	tSymbolPtr vkladany;
 	while(parametry_v != NULL){
 		vkladany = NULL;
-		if (najdi_v_tabulce(table, parametry_v->name) != NULL) return SEM_ERR;
+		if (find_tstack(table, parametry_v->name) != NULL) return SEM_ERR;
 		inicializuj_data(&vkladany); //alokuje pamet a inicializuje hodnoty
 		vkladany->typ = parametry_v->typ;
 		vkladany->defined = 1;
-		vloz_do_tabulky (&table, parametry_v->name, vkladany);
+		insert_tstack (table, parametry_v->name, vkladany);
+		printf("GENEROVANA INSTRUKCE: PUSH INTO %s\n", parametry_v->name);
 		parametry_v = parametry_v->next;
 	}
 	return IS_OK;

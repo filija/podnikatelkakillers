@@ -18,7 +18,7 @@ DEFINICE -> strednik
 DEFINICE -> SLOZENY
 
 PRIKAZ -> PROMENNA strednik					
-PRIKAZ -> id rovnitko PRIRAZENI strednik
+PRIKAZ -> id rovnitko PRIRAZENI strednik	//lokalni promenna ma prednost pred funkcni promennou
 PRIKAZ -> if lz expr pz SLOZENY else SLOZENY
 PRIKAZ -> for lz PROMENNA strednik expr strednik id rovnitko expr pz SLOZENY
 PRIKAZ -> return expr strednik
