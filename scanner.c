@@ -13,7 +13,6 @@
 
 FILE *source;
 
-
 void setSourceFile(FILE *f){
   source = f;
 }
@@ -25,6 +24,8 @@ void lErr(){
 
 int getNextToken(string *attr){
 
+	int esc = 0;
+	
 	int state = 0; //při hledání každého nového tokenu bude počáteční stav 0 
 	int c;
 	strClear(attr);//vyčítím řetězec pro nové použití
@@ -54,7 +55,6 @@ int getNextToken(string *attr){
 					state = 11;
 				}
 				else if (c == '"'){
-					strAddChar(attr, c);
 					state = 15;
 				}
 				else if (c == '/')
@@ -239,19 +239,72 @@ int getNextToken(string *attr){
 			/***** STRING *****/
 			case 15:
 				if (c == '\\') {
-					strAddChar(attr, c);
 					state = 16;
 				}
 				else if (c == '"'){
-					strAddChar(attr, c);
 					return STRING_V;
 				}
 				else
 					strAddChar(attr, c);
 			break;
 			case 16:
-				strAddChar(attr, c);
-				state = 15;
+				if (c == '\\'){
+					strAddChar(attr, '\\');
+					state = 15;
+				}
+				else if (c == 't'){
+					strAddChar(attr, '\t');
+					state = 15;
+				}
+				else if (c == 'n'){
+					strAddChar(attr, '\n');
+					state = 15;
+				}
+				else if (c == '"'){
+					strAddChar(attr, '"');
+					state = 15;
+				}
+				else if (c == 'x'){
+					state = 17;
+				}
+				else{
+					lErr();
+				}
+			break;
+			case 17:
+				if (isxdigit(c)){
+					if (c >= 'a' && c <= 'f'){
+						esc = (c - 'a' + 10) * 16;
+					}
+					else if (c >= 'A' && c <= 'F'){
+						esc = (c - 'A' + 10) * 16;
+					}
+					else{
+						esc = (c - '0') * 16;
+					}
+					state = 18;
+				}
+				else
+					lErr();
+			break;
+			case 18:
+				if (isxdigit(c)){
+					if (c == '0')
+						lErr();
+					if (c >= 'a' && c <= 'f'){
+						esc = esc + (c - 'a' + 10);
+					}
+					else if (c >= 'A' && c <= 'F'){
+						esc = esc + (c - 'A' + 10);
+					}
+					else{
+						esc = esc + (c - '0');
+					}
+					strAddChar(attr, esc);
+					state = 15;
+				}
+				else
+					lErr();
 			break;
 
 			/***** COMMENT *****/
