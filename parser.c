@@ -25,7 +25,17 @@ tSymbolPtr data; // data prubezna
 
 void print_koren_udu(uk_uzel tabulka){	//SMAZAT PRED ODEVZDANIM!!!!
 	if(tabulka == NULL) return;
-	printf("Jmeno a hodnota(int) je >>> %s %i %f\n", tabulka->symbol, tabulka->data->value.i, tabulka->data->value.d);
+	switch (tabulka->data->typ){
+		case INT_V:
+			printf("Jmeno a hodnota(int) je >>> %s %i\n", tabulka->symbol, tabulka->data->value.i);
+			break;
+		case DOUBLE_V:
+			printf("Jmeno a hodnota(flt) je >>> %s %f\n", tabulka->symbol, tabulka->data->value.d);
+			break;
+		case STRING_V:
+			printf("Jmeno a hodnota(str) je >>> %s %s\n", tabulka->symbol, tabulka->data->value.s);
+			break;
+	}
 	print_koren_udu(tabulka->LPtr);
 	print_koren_udu(tabulka->RPtr);
 }
@@ -439,12 +449,15 @@ int prec_prevod(int* token, char** attrc){	//prevadi tokeny na adresaci do tabul
 			insert_tstack (table, *attrc, vkladany);
 			*token = ID;
 			return S_ID;
-		case STRING_V:
-			//attr se zkopiruje na novy oddil pameti (kdyby se zkopirval ukazatel, tak po zmene attr, by jsme ztratili "hodnotu")
-			//hodnota se ulozi s unikatnim identifikatorem do lokalni tabulky
-			//unikatni identifikator se zapise do attr
+		case STRING_V:;
+			char* tmp_s;
+			tmp_s = *attrc;
 			generateVariable(attrc);
-			//zmeni se hodnota tokenu na ID
+			inicializuj_data(&vkladany);
+			vkladany->typ = STRING_V;
+			vkladany->defined = 1;
+			vkladany->value.s=tmp_s;
+			insert_tstack(table, *attrc, vkladany);
 			*token = ID;
 			return S_ID;
 		case ID:
@@ -589,6 +602,7 @@ int deklarace(tSymbolPtr *funkce_v){
 			else {	//jinak se vlozi informace do globalni tabulky
 				inicializuj_data(&hledany); //alokuje pamet a inicializuje hodnoty
 				hledany->typ = typ_v;
+				if (typ_v == STRING_V) hledany->value.s = NULL;
 				hledany->verze = 1;
 				hledany->parametry = parametry_v;
 				vloz_do_tabulky(&global_table, nazev, hledany);
@@ -1095,6 +1109,7 @@ int promenna(int prepinac){	//prepinac resi jestli je povoleno nemit definici pr
 			if (najdi_v_tabulce (table->tabulka, nazev) != NULL) return SEM_ERR;
 			inicializuj_data(&vkladany); //alokuje pamet a inicializuje hodnoty
 			vkladany->typ = typ_v;
+			if (typ_v == STRING_V) vkladany->value.s = NULL;
 			insert_tstack (table, nazev, vkladany);
 			getToken
 			outcome = prirad(&ziskany);
@@ -1124,6 +1139,7 @@ int promenna(int prepinac){	//prepinac resi jestli je povoleno nemit definici pr
 			if (outcome != IS_OK) return outcome;
 			p_ziskany = find_tstack (table, ziskany);	//potrebujeme najit datovy typ promenne
 			vkladany->typ = p_ziskany->typ;
+			if (typ_v == STRING_V) vkladany->value.s = NULL;
 			printf("typy: %i %i\n", p_ziskany->typ, vkladany->typ);
 			printf("GENEROVANA INSTRUKCE: %s = %s\n", nazev, ziskany);
 			return IS_OK;
@@ -1250,8 +1266,16 @@ int term(char **ziskany){
 			getToken
 			return IS_OK;
 			break;
-		case STRING_V:
+		case STRING_V:;
 			/* TERM → literal */
+			char* tmp_s;
+			string_from_char(&tmp_s, &attr);
+			generateVariable(ziskany);
+			inicializuj_data(&p_ziskany);
+			p_ziskany->typ = STRING_V;
+			p_ziskany->defined = 1;
+			p_ziskany->value.s=tmp_s;
+			insert_tstack (table, *ziskany, p_ziskany);
 			getToken
 			return IS_OK;
 			break;
@@ -1270,7 +1294,7 @@ int load_params(param *parametry_v){
 		vkladany->typ = parametry_v->typ;
 		vkladany->defined = 1;
 		insert_tstack (table, parametry_v->name, vkladany);
-		printf("GENEROVANA INSTRUKCE: PUSH INTO %s\n", parametry_v->name);
+		printf("GENEROVANA INSTRUKCE: POP INTO %s\n", parametry_v->name);
 		parametry_v = parametry_v->next;
 	}
 	return IS_OK;

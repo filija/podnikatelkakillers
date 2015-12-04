@@ -289,7 +289,7 @@ int getNextToken(string *attr){
 			break;
 			case 18:
 				if (isxdigit(c)){
-					if (c == '0')
+					if (c == '0' && esc == 0)
 						lErr();
 					if (c >= 'a' && c <= 'f'){
 						esc = esc + (c - 'a' + 10);
