@@ -1,3 +1,8 @@
+#ifndef INSTRUCTION_LIST_H
+#define INSTRUCTION_LIST_H
+#include "define.h"
+#include <stdlib.h>
+
 #define I_SCITANI		1
 #define I_ODCITANI		2
 #define I_NASOBENI		3
@@ -37,3 +42,12 @@ typedef struct
   tInstr *last;   // ukazatel na posledni prvek
   tInstr *active; // ukazatel na aktivni prvek
 } tListOfInstr;
+
+void listInit(tListOfInstr *L);
+int listInsertLast(tListOfInstr *L, int instType, void *addr1, void *addr2, void *addr3);
+void listFirst(tListOfInstr *L);
+void listNext(tListOfInstr *L);
+void *listGetPointerLast(tListOfInstr *L);
+void listGoto(tListOfInstr *L, void *gotoInstr);
+
+#endif /* INSTRUCTION_LIST_H */

@@ -1,12 +1,9 @@
 #include <stdio.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <string.h>
-//#include "str.h"
-//#include "stable.h"
-//#include "ilist.h"
+#include "instruction_list.h"
 #include "scanner.h"
 #include "define.h"
-//#include "syntax.h"
 #include "tabulka_symbolu.h"
 
 typedef struct listPrecedence {
@@ -24,7 +21,7 @@ int poptPrc(PrcPtr *list);
 int syntax_precedencka(char **p_result);
 int prec_prevod(int* token, char** attrc);
 //int parse(struct symbol_table* table_hl, tList *list, ptrStack stack_hl); //
-int parse(uk_uzel *GT);
+int parse(uk_uzel *GT, tListOfInstr* inst_list);
 int program();
 int dfunkce();
 int funkce();
