@@ -44,9 +44,9 @@ void *listGetPointerLast(tListOfInstr *L)
   return (void*) L->last;
 }
 
-void listGoto(tListOfInstr *L, void *gotoInstr)
+void listJump(tListOfInstr *L, tInstr *Jump)
 // nastavime aktivni instrukci podle zadaneho ukazatele
 {
-  L->active = (tInstr*) gotoInstr;
+  L->active = Jump;
 }
 

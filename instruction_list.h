@@ -48,6 +48,6 @@ int listInsertLast(tListOfInstr *L, int instType, void *addr1, void *addr2, void
 void listFirst(tListOfInstr *L);
 void listNext(tListOfInstr *L);
 void *listGetPointerLast(tListOfInstr *L);
-void listGoto(tListOfInstr *L, void *gotoInstr);
+void listJump(tListOfInstr *L, tInstr *Jump);
 
 #endif /* INSTRUCTION_LIST_H */

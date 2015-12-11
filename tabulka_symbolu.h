@@ -6,6 +6,7 @@
 #include <string.h>
 #include "define.h"
 #include "str.h"
+#include "instruction_list.h"
 
 // #define TRUE 1
 // #define FALSE 0
@@ -37,7 +38,7 @@ struct sym   // symbol
     param *parametry; // typy a jmena parametru
     int defined; // 1 ano, 0 ne
     uk_uzel tabulka; // ukazatel na tabulku - glob ->lok
-    // ukazatel na label
+    tInstr *label;
 };
 
 struct SymbolTable
@@ -68,6 +69,8 @@ int zkontroluj_parametry(param *parametr, tSymbolPtr data);
 int push_tstack(tStackPtr *stack, uk_uzel tabulka, int zarazka);
 int pop_tstack(tStackPtr *stack);
 tSymbolPtr find_tstack(tStackPtr stack, char* name);
+tSymbolPtr out_find_tstack(tStackPtr stack, char* name);
 int insert_tstack(tStackPtr stack, char *K, tSymbolPtr data);
+int check_defined(uk_uzel glob_table);
 
 #endif /* TABULKA_SYMBOLU_H */

@@ -20,7 +20,6 @@ int topPrc(PrcPtr list);
 int poptPrc(PrcPtr *list);
 int syntax_precedencka(char **p_result);
 int prec_prevod(int* token, char** attrc);
-//int parse(struct symbol_table* table_hl, tList *list, ptrStack stack_hl); //
 int parse(uk_uzel *GT, tListOfInstr* inst_list);
 int program();
 int dfunkce();

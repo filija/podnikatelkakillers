@@ -6,35 +6,23 @@ int countVar = 0;
 tStackPtr table = NULL;
 uk_uzel global_table = NULL;
 string attr;
-tSymbolPtr data; // data prubezna
 tListOfInstr *list; // list instrukci
-
-/*Funkce pro generovani instrukci*/
-/*int generateInstruction(int instType, void *addr1, void *addr2, void *addr3)
-
-{
-   int result;
-   tInstr I;
-   I.Type = instType;
-   I.addr1 = addr1;
-   I.addr2 = addr2;
-   I.addr3 = addr3;
-   result = InsertNew(LS, I);
-   return result;
-}*/
+int fun_type;
 
 void print_koren_udu(uk_uzel tabulka){	//SMAZAT PRED ODEVZDANIM!!!!
 	if(tabulka == NULL) return;
 	switch (tabulka->data->typ){
 		case INT_V:
-			//printf("Jmeno a hodnota(int) je >>> %s %i\n", tabulka->symbol, tabulka->data->value.i);
+			printf("Jmeno a hodnota(int) je >>> %s %i\n", tabulka->symbol, tabulka->data->value.i);
 			break;
 		case DOUBLE_V:
-			//printf("Jmeno a hodnota(flt) je >>> %s %f\n", tabulka->symbol, tabulka->data->value.d);
+			printf("Jmeno a hodnota(flt) je >>> %s %f\n", tabulka->symbol, tabulka->data->value.d);
 			break;
 		case STRING_V:
-			//printf("Jmeno a hodnota(str) je >>> %s %s\n", tabulka->symbol, tabulka->data->value.s);
+			printf("Jmeno a hodnota(str) je >>> %s %s\n", tabulka->symbol, tabulka->data->value.s);
 			break;
+		default:
+			printf("JMENO ???::: %s\n", tabulka->symbol);
 	}
 	print_koren_udu(tabulka->LPtr);
 	print_koren_udu(tabulka->RPtr);
@@ -176,7 +164,6 @@ do{
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
 					insert_tstack(table, atr2, vkladany2);
-					//printf("GENEROVANA INSTRUKCE: %s = %s + %s\n", atr2, atr3, atr1);
 					listInsertLast(list, I_SCITANI, (void*)atr3, (void*)atr1, (void*)atr2);
 					pushPrc(ID, atr2, &PSAlist);
 					break;
@@ -203,7 +190,6 @@ do{
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
 					insert_tstack(table, atr2, vkladany2);
-					//printf("GENEROVANA INSTRUKCE: %s = %s - %s\n", atr2, atr3, atr1);
 					listInsertLast(list, I_ODCITANI, (void*)atr3, (void*)atr1, (void*)atr2);
 					pushPrc(ID, atr2, &PSAlist);
 					break;
@@ -230,7 +216,6 @@ do{
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
 					insert_tstack(table, atr2, vkladany2);
-					//printf("GENEROVANA INSTRUKCE: %s = %s * %s\n", atr2, atr3, atr1);
 					listInsertLast(list, I_NASOBENI, (void*)atr3, (void*)atr1, (void*)atr2);
 					pushPrc(ID, atr2, &PSAlist);
 					break;
@@ -257,7 +242,6 @@ do{
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
 					insert_tstack(table, atr2, vkladany2);
-					//printf("GENEROVANA INSTRUKCE: %s = %s / %s\n", atr2, atr3, atr1);
 					listInsertLast(list, I_DELENI, (void*)atr3, (void*)atr1, (void*)atr2);
 					pushPrc(ID, atr2, &PSAlist);
 					break;
@@ -282,7 +266,6 @@ do{
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
 					insert_tstack(table, atr2, vkladany2);
-					//printf("GENEROVANA INSTRUKCE: %s = %s == %s\n", atr2, atr3, atr1);
 					listInsertLast(list, I_ROVNO, (void*)atr3, (void*)atr1, (void*)atr2);
 					pushPrc(ID, atr2, &PSAlist);
 					break;
@@ -307,7 +290,6 @@ do{
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
 					insert_tstack(table, atr2, vkladany2);
-					//printf("GENEROVANA INSTRUKCE: %s = %s <= %s\n", atr2, atr3, atr1);
 					listInsertLast(list, I_MENSI_NEBO, (void*)atr3, (void*)atr1, (void*)atr2);
 					pushPrc(ID, atr2, &PSAlist);
 					break;
@@ -332,7 +314,6 @@ do{
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
 					insert_tstack(table, atr2, vkladany2);
-					//printf("GENEROVANA INSTRUKCE: %s = %s < %s\n", atr2, atr3, atr1);
 					listInsertLast(list, I_MENSI, (void*)atr3, (void*)atr1, (void*)atr2);
 					pushPrc(ID, atr2, &PSAlist);
 					break;
@@ -357,7 +338,6 @@ do{
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
 					insert_tstack(table, atr2, vkladany2);
-					//printf("GENEROVANA INSTRUKCE: %s = %s != %s\n", atr2, atr3, atr1);
 					listInsertLast(list, I_NEROVNO, (void*)atr3, (void*)atr1, (void*)atr2);
 					pushPrc(ID, atr2, &PSAlist);
 					break;
@@ -382,7 +362,6 @@ do{
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
 					insert_tstack(table, atr2, vkladany2);
-					//printf("GENEROVANA INSTRUKCE: %s = %s >= %s\n", atr2, atr3, atr1);
 					listInsertLast(list, I_VETSI_NEBO, (void*)atr3, (void*)atr1, (void*)atr2);
 					pushPrc(ID, atr2, &PSAlist);
 					break;
@@ -407,12 +386,11 @@ do{
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
 					insert_tstack(table, atr2, vkladany2);
-					//printf("GENEROVANA INSTRUKCE: %s = %s > %s\n", atr2, atr3, atr1);
 					listInsertLast(list, I_VETSI, (void*)atr3, (void*)atr1, (void*)atr2);
 					pushPrc(ID, atr2, &PSAlist);
 					break;
 				default:
-					//printf("Toto by se nemelo stat. nahlasit!\n");
+					printf("Toto by se nemelo stat. nahlasit!\n");
 					//stdout ze tady by to nikdy dojit nemelo a najit v jakem pripade se to stalo :)
 					break;
 			}
@@ -500,7 +478,6 @@ int prec_prevod(int* token, char** attrc){	//prevadi tokeny na adresaci do tabul
 	}
 }
 /*Hlavni funkce parseru*/
-//int parse(struct symbol_table* table_hl, tList *list){
 int parse(uk_uzel *GT, tListOfInstr* inst_list){ 
   int result;
   global_table = *GT;/*Nastaveni tabulky*/
@@ -512,6 +489,7 @@ int parse(uk_uzel *GT, tListOfInstr* inst_list){
      result = program();/*Zavolani kontoly syntaxe programu*/
   /*Uvolneni retezcu*/
   strFree(&attr);
+  *GT = global_table;
   return result;
 }
 
@@ -781,19 +759,19 @@ int definice(tSymbolPtr funkce_v){
 		case LS_ZAVORKA:
 			if (funkce_v->defined == 1) return SEM_ERR;
 			funkce_v->defined = 1;
+			fun_type = funkce_v->typ;
 			push_tstack(&table, NULL, 1);
-			//printf("GENEROVAN LABEL FUNKCE: %s\n", funkce_v->symbol);
-			//vytvorit instrukci label a dat ji definici funkci
+			listInsertLast(list, I_LABEL, NULL, NULL, (void*)funkce_v->symbol);
+			funkce_v->label = list->last;
 			//funkcni label by mel byt asi jiny nez klasicky, aby vytvoril automaticky novou uroven a natahnul si tabulku -> bude resit CALL!
 			outcome = load_params(funkce_v->parametry);	//vlozeni parametru do lokalni tabulky
 			if (outcome != IS_OK) return outcome;
 			outcome = slozeny();
 			if (outcome != IS_OK) return outcome;
 			funkce_v->tabulka = table->tabulka;	//ulozeni lokalni tabulky
-			print_koren_udu(funkce_v->tabulka);	//SMAZAT
 			pop_tstack(&table);
 			//label/znacka ukonceni funkce (pokud se na nej dojde, tak nastala chyba typu nenalezen return prikaz)
-			//printf("GENEROVANI CHYBOVEHO LABELU PRO FUNKCE \n");
+			listInsertLast(list, I_FUN_ERR, NULL, NULL, NULL);
 			return IS_OK;
 			break;
 		case STREDNIK:
@@ -841,7 +819,7 @@ int prikaz(){
 			p_ziskany = find_tstack (table, ziskany); //zpracovani vysledku z precedencky + kontrola typu
 			if ((p_ziskany->typ == STRING_V && p_prirazeny->typ != STRING_V) || (p_ziskany->typ != STRING_V && p_prirazeny->typ == STRING_V)) return STYPE_ERR;
 			p_prirazeny->defined = 1;
-			//printf("GENEROVANA INSTRUKCE: %s = %s\n", p_prirazeny->symbol, p_ziskany->symbol);
+			listInsertLast(list, I_PRIRAZENI, (void*)p_ziskany->symbol, NULL, (void*)p_prirazeny->symbol);
 			if (token != STREDNIK) return SYN_ERR;
 			getToken
 			return IS_OK;
@@ -853,53 +831,51 @@ int prikaz(){
 			getToken
 			outcome = syntax_precedencka(&ziskany);
 			if (outcome != IS_OK) return outcome;
-			if (token != P_ZAVORKA) return SYN_ERR;
 			p_ziskany = find_tstack (table, ziskany);	//kontrola ziskane hodnoty z precedencni analyzy
 			if (!(p_ziskany->typ == INT_V || p_ziskany->typ == DOUBLE_V)) return STYPE_ERR;
+			if (token != P_ZAVORKA) return SYN_ERR;
 			generateVariable(&label1);
-			//printf("GENEROVANA INSTRUKCE: JUMP ON 0 podminka: %s kam: %s\n", p_ziskany->symbol, label1);
+			listInsertLast(list, I_PODM_SKOK, (void*)p_ziskany->symbol, NULL, (void*)label1);
 			generateVariable(&label2);
-			//printf("GENEROVANA INSTRUKCE: LABEL WITH PUSH (work table) %s\n", label2);
 			inicializuj_data(&p_label);
-			//vloz adresu labelu do dat
+			listInsertLast(list, I_LABEL_LOAD, NULL, NULL, (void*)label2);
+			p_label->label = list->last;
 			push_tstack(&table, NULL, 0);	//vytvoreni nove urovne lokalnich dat, s moznosti pristupovat o uroven vys
 			getToken
 			outcome = slozeny();
 			if (outcome != IS_OK) return outcome;
 			p_label->tabulka = table->tabulka;	//ulozeni informaci o lokalnich datech na teto urovni
-			print_koren_udu(p_label->tabulka); //SMAZAT
 			pop_tstack(&table);		//zruseni lokalnich dat
 			insert_tstack(table, label2, p_label);	//ulozeni labelu s tabulkou
-			//printf("GENEROVANA INSTRUKCE: POP TABLE\n");
+			listInsertLast(list, I_UNLOAD, NULL, NULL, NULL);
 			generateVariable(&label3);
-			//printf("GENEROVANA INSTRUKCE: JUMP %s\n", label3);
+			listInsertLast(list, I_SKOK, NULL, NULL, (void*)label3);
 			p_label = NULL;
 			if (token != ELSE) return SYN_ERR;
-			//printf("GENEROVANA INSTRUKCE: LABEL WITH PUSH (work table) %s\n", label1);
 			inicializuj_data(&p_label);
-			//vloz adresu labelu do dat
+			listInsertLast(list, I_LABEL_LOAD, NULL, NULL, (void*)label1);
+			p_label->label = list->last;
 			push_tstack(&table, NULL, 0);
 			getToken
 			outcome = slozeny();
 			if (outcome != IS_OK) return outcome;
 			p_label->tabulka = table->tabulka;
-			print_koren_udu(p_label->tabulka);
 			pop_tstack(&table);
 			insert_tstack(table, label1, p_label);
-			//printf("GENEROVANA INSTRUKCE: POP TABLE\n");
-			//printf("GENEROVANA INSTRUKCE: LABEL %s\n", label3);
+			listInsertLast(list, I_UNLOAD, NULL, NULL, NULL);
+			listInsertLast(list, I_LABEL, NULL, NULL, (void*)label3);
 			p_label = NULL;
 			inicializuj_data(&p_label);
-			//vloz adresu labelu do dat
+			p_label->label = list->last;
 			insert_tstack(table, label3, p_label);
 			return IS_OK;
 			break;
 		/* PRIKAZ → for lz PROMENNA strednik expr strednik id rovnitko expr pz SLOZENY */
 		case FOR:
 			generateVariable(&label1);
-			//printf("GENEROVANA INSTRUKCE: LABEL WITH PUSH (work table) %s\n", label1);
+			listInsertLast(list, I_LABEL_LOAD, NULL, NULL, (void*)label1);
 			inicializuj_data(&p_label);
-			//vloz adresu labelu do dat
+			p_label->label = list->last;
 			push_tstack(&table, NULL, 0);
 			getToken
 			if (token != L_ZAVORKA) return SYN_ERR;
@@ -908,17 +884,22 @@ int prikaz(){
 			if (outcome != IS_OK) return outcome;
 			if (token != STREDNIK) return SYN_ERR;
 			generateVariable(&label2);
-			//printf("GENEROVANA INSTRUKCE: LABEL %s\n", label2);
 			inicializuj_data(&p_label2);
-			//vloz adresu labelu do dat
+			listInsertLast(list, I_LABEL, NULL, NULL, (void*)label2);
+			p_label2->label = list->last;
 			insert_tstack(table, label2, p_label2);
 			getToken
 			outcome = syntax_precedencka(&ziskany);
 			if (outcome != IS_OK) return outcome;
+			p_ziskany = find_tstack (table, ziskany);	//kontrola ziskane hodnoty z precedencni analyzy
+			if (!(p_ziskany->typ == INT_V || p_ziskany->typ == DOUBLE_V)) return STYPE_ERR;
 			generateVariable(&label3);
-			//printf("GENEROVANA INSTRUKCE: JUMP ON 0 podminka: %s kam: %s\n", ziskany, label3);
+			listInsertLast(list, I_PODM_SKOK, p_ziskany->symbol, NULL, (void*)label3);
 			if (token != STREDNIK) return SYN_ERR;
-			//printf("ZMENA UKLADANI INSTRUKCI\n");
+			tListOfInstr *keylist = list;
+			tListOfInstr tmplist;
+   			listInit(&tmplist);
+   			list = &tmplist;
 			getToken
 			if (token != ID) return SYN_ERR;
 			p_prirazeny = find_tstack (table, attr.str);
@@ -933,18 +914,22 @@ int prikaz(){
 			if ((p_ziskany->typ == INT_V || p_ziskany->typ == DOUBLE_V) && (p_prirazeny->typ == INT_V || p_prirazeny->typ == DOUBLE_V));
 			else if (p_ziskany->typ == STRING_V && p_prirazeny->typ == STRING_V);
 			else return STYPE_ERR;
-			//printf("GENEROVANA INSTRUKCE: %s = %s\n", p_prirazeny->symbol, p_ziskany->symbol);
-			//printf("KONEC ZMENA UKLADANI INSTRUKCI\n"); 
+			listInsertLast(list, I_PRIRAZENI, (void*)p_ziskany->symbol, NULL, (void*)p_prirazeny->symbol);
+			list = keylist;
 			if (token != P_ZAVORKA) return SYN_ERR;
 			getToken
 			outcome = slozeny();
 			if (outcome != IS_OK) return outcome;
-			//printf("VLOZIT ZMENENE UKLADANE INSTRUKCE\n");
-			//printf("GENEROVANA INSTRUKCE: JUMP %s\n", label2);
-			//printf("GENEROVANA INSTRUKCE: LABEL %s\n", label3);
-			//printf("GENEROVANA INSTRUKCE: POP TABLE\n");
+			list->last->next = tmplist.first;
+			list->last = tmplist.last;
+			listInsertLast(list, I_SKOK, NULL, NULL, (void*)label2);
+			p_label2 = NULL;
+			inicializuj_data(&p_label2);
+			listInsertLast(list, I_LABEL, NULL, NULL, (void*)label3);
+			p_label2->label = list->last;
+			insert_tstack(table, label3, p_label2);
+			listInsertLast(list, I_UNLOAD, NULL, NULL, NULL);
 			p_label->tabulka = table->tabulka;
-			print_koren_udu(p_label->tabulka);
 			pop_tstack(&table);
 			insert_tstack(table, label1, p_label);
 			return IS_OK;
@@ -954,7 +939,11 @@ int prikaz(){
 			getToken
 			outcome = syntax_precedencka(&ziskany);
 			if (outcome != IS_OK) return outcome;
-			//printf("GENEROVANA INSTRUKCE: RETURN %s\n", ziskany);
+			p_ziskany = find_tstack (table, ziskany);
+			if ((p_ziskany->typ == INT_V || p_ziskany->typ == DOUBLE_V) && (fun_type == INT_V || fun_type == DOUBLE_V));
+			else if (p_ziskany->typ == STRING_V && fun_type == STRING_V);
+			else return STYPE_ERR;
+			listInsertLast(list, I_RETURN, NULL, NULL, (void*)ziskany);
 			if (token != STREDNIK) return SYN_ERR;
 			getToken
 			return IS_OK;
@@ -997,14 +986,14 @@ int prirazeni(char **ziskany){
 				getToken
 				outcome = termy(p_ziskany->parametry);	//zde probiha kontrola shody parametru + volani instrukce push
 				if (outcome != IS_OK) return outcome;
-				//printf("GENEROVANA INSTRUKCE: CALL %s\n", p_ziskany->symbol);
+				listInsertLast(list, I_CALL, NULL, NULL, (void*)p_ziskany->symbol);
 				generateVariable(ziskany);
 				tSymbolPtr p_mezivysledek;
 				inicializuj_data(&p_mezivysledek);
 				p_mezivysledek->typ = p_ziskany->typ;
 				p_mezivysledek->defined = 1;
 				insert_tstack(table, *ziskany, p_mezivysledek);
-				//printf("GENEROVANA INSTRUKCE: POP INTO %s\n", *ziskany);	//pop musi kontrolovat jestli mu dosly spravne data!
+				listInsertLast(list, I_POP, NULL, NULL, (void*)p_mezivysledek->symbol);
 				if (token != P_ZAVORKA) return SYN_ERR;
 				getToken
 				return IS_OK;
@@ -1028,7 +1017,7 @@ int nacteni(){
 			if (token != ID) return SYN_ERR;
 			p_ziskany = find_tstack(table, attr.str);
 			if (p_ziskany == NULL) return SEM_ERR;	//kontrola jestli ID existuje
-			//printf("GENEROVANA INSTRUKCE: CTI ZE VSTUPU DO %s\n", p_ziskany->symbol);
+			listInsertLast(list, I_CTENI, NULL, NULL, (void*)p_ziskany->symbol);
 			p_ziskany->defined = 1;
 			getToken 
 			outcome = dnacteni();
@@ -1069,7 +1058,7 @@ int vypis(){
 			getToken
 			outcome = term(&ziskany);
 			if (outcome != IS_OK) return outcome;
-			//printf("GENEROVANA INSTRUKCE: ZAPIS NA VSTUP %s\n", ziskany);
+			listInsertLast(list, I_ZAPIS, NULL, NULL, (void*)ziskany);
 			outcome = dvypis();
 			if (outcome != IS_OK) return outcome;
 			return IS_OK;
@@ -1127,7 +1116,7 @@ int promenna(int prepinac){	//prepinac resi jestli je povoleno nemit definici pr
 				p_ziskany = find_tstack (table, ziskany);	//potrebujeme najit datovy typ promenne
 				if ((p_ziskany->typ == STRING_V && vkladany->typ != STRING_V) || (p_ziskany->typ != STRING_V && vkladany->typ == STRING_V)) return STYPE_ERR;
 				vkladany->defined = 1;
-				//printf("GENEROVANA INSTRUKCE: %s = %s\n", nazev, ziskany);
+				listInsertLast(list, I_PRIRAZENI, (void*)ziskany, NULL, (void*)nazev);
 			}
 			else if (prepinac) return SEM_ERR;
 			return IS_OK;
@@ -1149,8 +1138,7 @@ int promenna(int prepinac){	//prepinac resi jestli je povoleno nemit definici pr
 			p_ziskany = find_tstack (table, ziskany);	//potrebujeme najit datovy typ promenne
 			vkladany->typ = p_ziskany->typ;
 			if (typ_v == STRING_V) vkladany->value.s = NULL;
-			//printf("typy: %i %i\n", p_ziskany->typ, vkladany->typ);
-			//printf("GENEROVANA INSTRUKCE: %s = %s\n", nazev, ziskany);
+			listInsertLast(list, I_PRIRAZENI, (void*)ziskany, NULL, (void*)nazev);
 			return IS_OK;
 			break;
 		default:
@@ -1193,8 +1181,8 @@ int termy(param *parametry_f){
 			outcome = term(&ziskany);
 			if (outcome != IS_OK) return outcome;
 			p_ziskany = find_tstack (table, ziskany);
-			if (p_ziskany->typ != parametry_f->typ) return STYPE_ERR;
-			//printf("GENEROVANA INSTRUKCE: PUSH %s\n", ziskany);
+			if ((p_ziskany->typ == STRING_V && parametry_f->typ != STRING_V) || (p_ziskany->typ != STRING_V && parametry_f->typ == STRING_V)) return STYPE_ERR;
+			listInsertLast(list, I_PUSH, NULL, NULL, (void*)ziskany);
 			outcome = dterm(parametry_f->next);
 			if (outcome != IS_OK) return outcome;
 			return IS_OK;
@@ -1228,7 +1216,7 @@ int dterm(param *parametry_f){
 			if (outcome != IS_OK) return outcome;
 			p_ziskany = find_tstack (table, ziskany);
 			if (p_ziskany->typ != parametry_f->typ) return STYPE_ERR;
-			//printf("GENEROVANA INSTRUKCE: PUSH %s\n", ziskany);
+			listInsertLast(list, I_PUSH, NULL, NULL, (void*)ziskany);
 			outcome = dterm(parametry_f->next);
 			if (outcome != IS_OK) return outcome;
 			return IS_OK;
@@ -1303,7 +1291,7 @@ int load_params(param *parametry_v){
 		vkladany->typ = parametry_v->typ;
 		vkladany->defined = 1;
 		insert_tstack (table, parametry_v->name, vkladany);
-		//printf("GENEROVANA INSTRUKCE: POP INTO %s\n", parametry_v->name);
+		listInsertLast(list, I_POP, NULL, NULL, (void*)parametry_v->name);
 		parametry_v = parametry_v->next;
 	}
 	return IS_OK;
