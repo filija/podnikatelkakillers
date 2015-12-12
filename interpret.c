@@ -1,8 +1,7 @@
 #include "interpret.h"
 
 int interpret(tListOfInstr inst_list, uk_uzel global_table){
-	char in_buffer[BUFFER_LEN];
-	int in_status = 0;
+	char in_buffer[BUFFER_LEN] = "\n";
 	int in_position = 0;
 	tStackPtr lokalni_tabulky = NULL;
 	ZIPtr instr_stack = NULL;
@@ -19,10 +18,6 @@ int interpret(tListOfInstr inst_list, uk_uzel global_table){
 	push_tstack(&lokalni_tabulky, start->tabulka, 1);
 	push_tstack(&lokalni_tabulky, NULL, 0);
 	while(lokalni_tabulky != NULL){
-	if (in_status) {
-		if (in_status == 1) in_position = 0;
-		in_status--;
-	}
 	tInstr* aktualni = inst_list.active;
 	tSymbolPtr tmp1 = NULL;
 	tSymbolPtr tmp2 = NULL;
@@ -310,25 +305,31 @@ int interpret(tListOfInstr inst_list, uk_uzel global_table){
 				break;
 			case I_CTENI://#rup curak, zvlastni stavovy automat, ktery si bude volat cteni pokud je vstup prazdny... to co je napsane je k nicemu
 				tmp3 = out_find_tstack(lokalni_tabulky, aktualni->addr3);
-				if (in_status == 0){
-					fgets(in_buffer, BUFFER_LEN, stdin);
-					in_status++;
-					printf("%s", in_buffer);
-				}
+				int result;
 				switch (tmp3->typ){
 					case INT_V:;
-							int vystup = -1;
-							int result = cin_int(&vystup, in_buffer, &in_position);
-							printf("%i res: %i\n", vystup, result);
+							int vystupi;
+							result = cin_int(&vystupi, in_buffer, &in_position);
+							if (result != IS_OK) return result;
+							tmp3->value.i = vystupi;
 						break;
-					case DOUBLE_V:
-						
+					case DOUBLE_V:;
+							double vystupd;
+							result = cin_float(&vystupd, in_buffer, &in_position);
+							if (result != IS_OK) return result;
+							tmp3->value.d = vystupd;
 						break;
-					case STRING_V:
-						
+					case STRING_V:;
+							char* vystupc;
+							result = cin_string(&vystupc, in_buffer, &in_position);
+							if (result != IS_OK) return result;
+							if (tmp3->value.s == NULL)tmp3->value.s = vystupc;
+							else {
+								free(tmp3->value.s);
+								tmp3->value.s = vystupc;
+							}
 						break;					
 				}
-				in_status++;
 				break;
 			case I_ZAPIS:
 				tmp3 = find_tstack(lokalni_tabulky, aktualni->addr3);
@@ -465,10 +466,155 @@ tInstr* popZI(ZIPtr *Instr_zas){
 }
 
 int cin_int(int *vystup, char *vstup, int *pozice){
-	while (isspace(vstup[*pozice])) *pozice = *pozice + 1;
-	int poc_poz = *pozice;
-	while (isdigit(vstup[*pozice])) *pozice = *pozice + 1;
-	if (poc_poz == *pozice) return CIN_ERR;
-	*vystup = atoi(vstup+poc_poz);
-	return IS_OK;
+	int stav = 0;
+	int poc_pozice = 0;
+	while (1){
+		switch (stav){
+			case 0:
+				if (vstup[*pozice] == '\n') stav = 1;
+				else if (isspace(vstup[*pozice])) *pozice = *pozice + 1;
+				else if (isdigit(vstup[*pozice])){
+					poc_pozice = *pozice;
+					*pozice = *pozice + 1;
+					stav = 2;
+				}
+				else return CIN_ERR;
+				break;
+			case 1:
+				fgets(vstup, BUFFER_LEN, stdin);
+				*pozice = 0;
+				stav = 0;
+				break;
+			case 2:
+				if (isdigit(vstup[*pozice])) *pozice = *pozice + 1;
+				else {
+					*vystup = atoi(vstup+poc_pozice);
+					return IS_OK;
+				}
+		}
+	}
+}
+
+int cin_float(double *vystup, char *vstup, int *pozice){
+	int stav = 0;
+	int poc_pozice = 0;
+	while (1){
+		switch (stav){
+			case 0:
+				if (vstup[*pozice] == '\n') stav = 1;
+				else if (isspace(vstup[*pozice])) *pozice = *pozice + 1;
+				else if (isdigit(vstup[*pozice])){
+					poc_pozice = *pozice;
+					*pozice = *pozice + 1;
+					stav = 2;
+				}
+				else return CIN_ERR;
+				break;
+			case 1:
+				fgets(vstup, BUFFER_LEN, stdin);
+				*pozice = 0;
+				stav = 0;
+				break;
+			case 2:
+				if (isdigit(vstup[*pozice])) *pozice = *pozice + 1;
+				else if (vstup[*pozice] == '.'){
+					*pozice = *pozice + 1;
+					stav = 3;
+				}
+				else if (vstup[*pozice] == 'e' || vstup[*pozice] == 'E'){
+					*pozice = *pozice + 1;
+					stav = 5;
+				}
+				else return CIN_ERR;
+				break;
+			case 3:
+				if (isdigit(vstup[*pozice])){
+					*pozice = *pozice + 1;
+					stav = 4;
+				}
+				else return CIN_ERR;
+				break;
+			case 4:
+				if (isdigit(vstup[*pozice])) *pozice = *pozice + 1;
+				else if (vstup[*pozice] == 'e' || vstup[*pozice] == 'E'){
+					*pozice = *pozice + 1;
+					stav = 5;
+				}
+				else {
+					*vystup = atof(vstup+poc_pozice);
+					return IS_OK;
+				}
+				break;
+			case 5:
+				if (isdigit(vstup[*pozice])){
+					*pozice = *pozice + 1;
+					stav = 7;
+				}
+				else if (vstup[*pozice] == '+' || vstup[*pozice] == '-'){
+					*pozice = *pozice + 1;
+					stav = 6;
+				}
+				else return CIN_ERR;
+				break;
+			case 6:
+				if (isdigit(vstup[*pozice])){
+					*pozice = *pozice + 1;
+					stav = 7;
+				}
+				else return CIN_ERR;
+				break;
+			case 7:
+				if (isdigit(vstup[*pozice])) *pozice = *pozice + 1;
+				else {
+					*vystup = atof(vstup+poc_pozice);
+					return IS_OK;
+				}
+				break;
+		}
+	}
+}
+
+int cin_string(char **vystup, char *vstup, int *pozice){
+	int stav = 0;
+	int poc_pozice = 0;
+	int flag = 0;
+	while (1){
+		switch (stav){
+			case 0:
+				if (vstup[*pozice] == '\n') stav = 1;
+				else if (isspace(vstup[*pozice])) *pozice = *pozice + 1;
+				else {
+					poc_pozice = *pozice;
+					*pozice = *pozice + 1;
+					stav = 2;
+				}
+				break;
+			case 1:
+				if (flag){
+					*vystup = malloc(sizeof(char));
+					if (*vystup == NULL) return INTERNAL_ERR;
+					*vystup[0] = 0;
+					return IS_OK;
+				}
+				else{
+					fgets(vstup, BUFFER_LEN, stdin);
+					*pozice = 0;
+					stav = 0;
+					flag = 1;
+				}
+			break;
+			case 2:
+				if (isspace(vstup[*pozice])){
+					*vystup = malloc(*pozice - poc_pozice + 1);
+					if (*vystup == NULL) return INTERNAL_ERR;
+					strncpy (*vystup, vstup+poc_pozice, *pozice - poc_pozice);
+					(*vystup)[*pozice - poc_pozice] = '\0';
+					return IS_OK;
+				}
+				else {
+					*pozice = *pozice + 1;
+				}
+			break;
+		}
+	}
 }
