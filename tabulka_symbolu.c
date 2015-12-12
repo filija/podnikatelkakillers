@@ -238,7 +238,7 @@ tSymbolPtr out_find_tstack(tStackPtr stack, char* name){
 		} 
 		else{
 			if (stack->zarazka == 1) return NULL;
-				stack = tmpstack->next;
+			stack = tmpstack->next;
 		}
 	}
 	return NULL;
