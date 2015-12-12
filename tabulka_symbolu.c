@@ -15,7 +15,7 @@ int inicializuj_data(tSymbolPtr *symbol){
 	help_ptr->typ = 0;
 	help_ptr->verze = 0;
 	help_ptr->parametry = NULL;
-	help_ptr->value.i = -1;
+	help_ptr->value.s = NULL;
 	help_ptr->defined = 0;
 	help_ptr->tabulka = NULL;
 	*symbol = help_ptr;
@@ -132,7 +132,7 @@ int copy_item(tSymbolPtr* dest, tSymbolPtr source){ //nebude potrebovat kopirova
 	ukazatel->typ = source->typ;
 	ukazatel->verze = source->verze;
 	ukazatel->value = source->value;
-	//charDup(&(ukazatel->par_typy), source->par_typy);
+	ukazatel->parametry = NULL;
 	ukazatel->defined = source->defined;
 	ukazatel->tabulka = NULL;
 	ukazatel->label = NULL;

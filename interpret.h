@@ -23,3 +23,5 @@ int pushFronta(FrontaPtr* fronta, tSymbolPtr prvek);
 tSymbolPtr popFronta(FrontaPtr* fronta);
 int interpret(tListOfInstr inst_list, uk_uzel global_table);
 int cin_int(int *vystup, char *vstup, int *pozice);
+int cin_float(double *vystup, char *vstup, int *pozice);
+int cin_string(char **vystup, char *vstup, int *pozice);
