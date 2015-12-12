@@ -32,6 +32,7 @@ int getNextToken(string *attr){
 
 	while(1){
 		c = getc(source);
+		if (c == EOF && state != 0) lErr();
     	switch (state){
 			
 			/***** DEFAULT STATE *****/
