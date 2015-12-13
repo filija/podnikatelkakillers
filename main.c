@@ -1,3 +1,11 @@
+/*
+*  IFJ Projekt
+*     scanner pro jazyk IFJ15
+*     autor: Jakub Korgo, Martin Kruták, Nikolas Kantor
+*     login: xkorgo01, xkruta03, xkanto10
+*/
+
+
 #include <stdio.h>
 #include "str.h"
 #include "parser.h"

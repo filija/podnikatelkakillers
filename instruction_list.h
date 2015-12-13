@@ -1,3 +1,10 @@
+/*
+*	IFJ Projekt
+*		scanner pro jazyk IFJ15
+*		autor: Jakub Korgo, Martin Kruták
+*		login: xkorgo01, xkruta03
+*/
+
 #ifndef INSTRUCTION_LIST_H
 #define INSTRUCTION_LIST_H
 #include "define.h"

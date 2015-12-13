@@ -1,3 +1,11 @@
+/*
+*  IFJ Projekt
+*     scanner pro jazyk IFJ15
+*     autor: Jakub Filípek
+*     login: xfilip34
+*/
+
+
 //jednoducha knihovna pro praci s nekonecne dlouhymi retezci
 #include <string.h>
 #include <malloc.h>

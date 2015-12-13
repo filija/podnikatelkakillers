@@ -1,3 +1,11 @@
+/*
+*  IFJ Projekt
+*     scanner pro jazyk IFJ15
+*     autor: Jakub Filípek
+*     login: xfilip34
+*/
+
+
 #ifndef STR_H
 #define STR_H
 //hlavickovy soubor pro praci s nekonecne dlouhymi retezci

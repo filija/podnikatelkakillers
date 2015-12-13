@@ -1,3 +1,11 @@
+/*
+*	IFJ Projekt
+*		scanner pro jazyk IFJ15
+*		autor: Jakub Korgo, Martin Kruták
+*		login: xkorgo01, xkruta03
+*/
+
+
 #ifndef TABULKA_SYMBOLU_H
 #define TABULKA_SYMBOLU_H
 #include <stdio.h>
