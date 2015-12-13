@@ -1,3 +1,10 @@
+/*
+*	IFJ Projekt
+*		scanner pro jazyk IFJ15
+*		autor: Jakub Korgo
+*		login: xkorgo01
+*/
+
 #include <string.h>
 #include <ctype.h>
 #include "tabulka_symbolu.h"

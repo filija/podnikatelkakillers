@@ -1,3 +1,10 @@
+/*
+*	IFJ Projekt
+*		scanner pro jazyk IFJ15
+*		autor: Jakub Korgo
+*		login: xkorgo01
+*/
+
 #include "interpret.h"
 
 int interpret(tListOfInstr inst_list, uk_uzel global_table){	//smycka vykonavajici instrukce
@@ -87,17 +94,21 @@ int interpret(tListOfInstr inst_list, uk_uzel global_table){	//smycka vykonavaji
 				tmp3 = out_find_tstack(lokalni_tabulky, aktualni->addr3);
 				if (tmp1->typ == INT_V){
 					if (tmp2->typ == INT_V){
+						if (tmp2->value.i == 0) return DIVZERO_ERR;
 						tmp3->value.i = tmp1->value.i / tmp2->value.i;
 					}
 					else{
+						if (tmp2->value.d == 0.0) return DIVZERO_ERR;
 						tmp3->value.d = (double)tmp1->value.i / tmp2->value.d;
 					}
 				}
 				else{
 					if (tmp2->typ == INT_V){
+						if (tmp2->value.i == 0) return DIVZERO_ERR;
 						tmp3->value.d = tmp1->value.d / (double)tmp2->value.i;
 					}
 					else{
+						if (tmp2->value.d == 0.0) return DIVZERO_ERR;
 						tmp3->value.d = tmp1->value.d / tmp2->value.d;
 					}
 				}

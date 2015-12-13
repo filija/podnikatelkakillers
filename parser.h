@@ -1,3 +1,10 @@
+/*
+*	IFJ Projekt
+*		scanner pro jazyk IFJ15
+*		autor: Jakub Korgo, Martin Kruták, Jakub Filípek, Tadeáš Kovář, Nikolas Kantor
+*		login: xkorgo01, xkruta03, xfilip34, xkovar69, xkanto10
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -1,3 +1,10 @@
+/*
+*	IFJ Projekt
+*		scanner pro jazyk IFJ15
+*		autor: Jakub Korgo, Martin Kruták, Jakub Filípek, Tadeáš Kovář, Nikolas Kantor
+*		login: xkorgo01, xkruta03, xfilip34, xkovar69, xkanto10
+*/
+
 #include "parser.h"
 #define getToken if ((token = getNextToken(&attr)) == LEX_ERR){return LEX_ERR;}
 

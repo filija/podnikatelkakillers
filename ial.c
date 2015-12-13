@@ -1,4 +1,12 @@
 /*
+*	IFJ Projekt
+*		scanner pro jazyk IFJ15
+*		autor: Jakub Korgo, Martin Kruták
+*		login: xkorgo01, xkruta03
+*/
+
+
+/*
 * Implementace Shell-Sortu, Boyer-Mooreuv algortimus vyhledavani, tabulky za pomoci vyhledavaciho stromu a obsluznim rutinam kolem tabulek
 */
 

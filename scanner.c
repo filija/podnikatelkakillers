@@ -2,6 +2,7 @@
 *	IFJ Projekt
 *		scanner pro jazyk IFJ15
 *		autor: Nikolas Kantor
+*		login: xkanto10
 */
 
 #include <stdlib.h>
