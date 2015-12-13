@@ -1,9 +1,181 @@
 /*
-* Implementace Shell-Sortu a Boyer-Mooreuv algortimus vyhledavani
+* Implementace Shell-Sortu, Boyer-Mooreuv algortimus vyhledavani, tabulky za pomoci vyhledavaciho stromu a obsluznim rutinam kolem tabulek
 */
 
 #include "ial.h"
-#include <stdio.h>
+
+void inicializuj_tabulku(uk_uzel *Koren) { // inicializace stromu
+
+	*Koren = NULL;
+}
+
+int inicializuj_data(tSymbolPtr *symbol){
+	tSymbolPtr help_ptr = malloc(sizeof(struct sym));
+	if (help_ptr == NULL) return INTERNAL_ERR;
+	help_ptr->symbol = NULL;
+	help_ptr->typ = 0;
+	help_ptr->verze = 0;
+	help_ptr->parametry = NULL;
+	help_ptr->value.s = NULL;
+	help_ptr->defined = 0;
+	help_ptr->tabulka = NULL;
+	*symbol = help_ptr;
+	return IS_OK;
+}
+
+/*
+Funkce hleda dle zadaneho klice - symbol, zaznam v tabulce
+@par1 koren
+@par2 klic
+@return - v pripade nalezu vraci hodnotu klicem zadane polozky pokud nenalezne vraci 0
+*/
+
+tSymbolPtr najdi_v_tabulce(uk_uzel Koren, char *K)	{ // vyhledani uzlu zadaneho klicem
+
+	if(Koren == NULL){
+		return NULL;									// prazdny strom
+	}
+	if(strcmp(Koren->symbol,K) == 0){
+		return Koren->data;
+	}
+	if(strcmp(Koren->symbol,K) > 0){
+		return najdi_v_tabulce(Koren->LPtr, K);	// klic menci nez zadany - jedeme vlevo
+	}else{
+		return najdi_v_tabulce(Koren->RPtr, K);	// jinak vrpavo a znova
+	}
+}
+/*
+Funkce vlozi do tabulky zaznam
+@par1 koren
+@par2 klic - symbol (nazev promenne)
+@par3 verze - promenna, funkce
+@return - v pripade nealokovani noveho korene - nic
+*/
+
+int vloz_do_tabulky(uk_uzel *Koren, char *K, tSymbolPtr data)	{	// vlozi data s klicem, nekontroluje se
+
+	if ( *Koren != NULL ){
+		if (strcmp((*Koren)->symbol,K) > 0)
+			vloz_do_tabulky(&((*Koren)->LPtr), K, data);
+		else if (strcmp((*Koren)->symbol,K) < 0)
+			vloz_do_tabulky(&((*Koren)->RPtr), K, data);
+		else
+			return 1;
+	}else{
+		uk_uzel help_ptr;
+		help_ptr = malloc(sizeof(struct SymbolTable));
+		if ( help_ptr == NULL ){
+			return INTERNAL_ERR;
+		}
+		help_ptr->symbol = K;
+		data->symbol = K;
+		help_ptr->data = data;
+		help_ptr->LPtr = NULL;
+		help_ptr->RPtr = NULL;
+		*Koren = help_ptr;
+	}
+	return IS_OK;
+}
+/*
+Funkce zrusi tabulku
+@par1 koren
+@return - nic
+*/
+
+void znic_tabulku(uk_uzel Koren) {	//zruseni storomu
+
+	if(Koren == NULL){
+		return;
+	}
+	znic_tabulku((Koren)->LPtr); // jedem vlevo
+	znic_tabulku((Koren)->RPtr);	// jedem vpravo
+	free(Koren->symbol);
+	if ((Koren->data)->typ == 3) free((Koren->data)->value.s);
+	if ((Koren->data)->parametry != NULL) znic_parametry((Koren->data)->parametry);
+	if ((Koren->data)->tabulka != NULL) znic_tabulku((Koren->data)->tabulka);
+	free(Koren->data);
+	free(Koren);
+	Koren = NULL;
+}
+
+/*
+* Funkce provede deep copy struktury dat v tabulce symbolu
+* @param cilovy ukazatel na strukturu
+* @param zdrojovy ukazatel na strukturu dat
+* @return potvrzeni uspesnosti nebo vnitrni chybu
+*/
+int copy_item(tSymbolPtr* dest, tSymbolPtr source){ //nebude potrebovat kopirovat parametry fce, bude vzdy se kopirovat jen promenna!
+	tSymbolPtr ukazatel;
+	ukazatel = malloc(sizeof(struct sym));
+	if(ukazatel == NULL){
+		return INTERNAL_ERR; // right code?
+	}
+	ukazatel->symbol = source->symbol;
+	ukazatel->typ = source->typ;
+	ukazatel->verze = source->verze;
+	if (source->typ == 3){
+		if (source->value.s != NULL){			
+		int len = strlen(source->value.s);
+			char* tmp = malloc(len+1);
+			strcpy(tmp, source->value.s);
+			ukazatel->value.s = tmp;
+		}
+	}
+	else ukazatel->value = source->value;
+	ukazatel->parametry = NULL;
+	ukazatel->defined = source->defined;
+	ukazatel->tabulka = NULL;
+	ukazatel->label = NULL;
+	*dest = ukazatel;
+	return IS_OK;
+}
+
+int vloz_do_parametru(int typ, char* nazev, param **parametry_v){
+	if (*parametry_v == NULL){		
+		*parametry_v = malloc(sizeof(struct sym_param));
+		if(*parametry_v == NULL) return INTERNAL_ERR;
+		(*parametry_v)->typ = typ;
+		(*parametry_v)->name = nazev;
+		(*parametry_v)->next = NULL;
+		return IS_OK;
+	}
+	param* tmpparam = *parametry_v;
+	while (tmpparam->next != NULL){
+		tmpparam = tmpparam->next;
+	}
+	param* tmpparam2 = malloc(sizeof(struct sym_param));
+	if(tmpparam2 == NULL) return INTERNAL_ERR;
+	tmpparam2->typ = typ;
+	tmpparam2->name = nazev;
+	tmpparam2->next = NULL;
+	tmpparam->next = tmpparam2;
+	return IS_OK;
+}
+
+int zkontroluj_parametry(param *parametr, tSymbolPtr data){
+	if (parametr == NULL){
+		if (data->parametry == NULL) return IS_OK;
+		else return SEM_ERR;
+	}
+	if (data->parametry == NULL) return SEM_ERR;
+	param *tmp = data->parametry;
+	while (1){
+		if ((tmp->typ)!=(parametr->typ)) return SEM_ERR;
+		if (strcmp (tmp->name, parametr->name)) return SEM_ERR;
+		if (parametr->next == NULL && tmp->next == NULL) return IS_OK;
+		if (parametr->next == NULL || tmp->next == NULL) return SEM_ERR;
+		parametr = parametr->next;
+		tmp=tmp->next;
+	}
+}
+
+void znic_parametry(param *parametr){
+	if (parametr->next != NULL) znic_parametry(parametr->next);
+	free(parametr->name);
+	free(parametr);
+}
+
+
 
 /*
 * Funkce vraci delku retezce
@@ -146,58 +318,4 @@ char *sort(char *string){ //shell-sort - plne funkcni
 		}
 	}
 	return string;
-}
-
-void main(){
-	char *str = "Nekde je podretezec v tomto miste?";
-	char *str2 = "kaliste";
-	char *str3 = "podretezec";
-	char *strr = "";
-	int pozice = 0;
-	printf("**********************************\n");
-	printf("Test implementace funkci \n");
-	printf("**********************************\n\n");
-	pozice = find(str, str2);
-	printf(">> Test boyer-moore (negativni) \n");
-	printf("	Vychozi retezec: %s \n", str);
-	printf("	Hledany retezec: %s \n", str2);
-	printf("	Nalezena pozice: %d \n", pozice);
-	pozice = find(str, str3);
-	printf(">> Test boyer-moore (pozitivni) \n");
-	printf("	Vychozi retezec: %s \n", str);
-	printf("	Hledany retezec: %s \n", str3);
-	printf("	Nalezena pozice: %d \n", pozice);
-	pozice = find(str, strr);
-	printf(">> Test boyer-moore (prazdny retezec) \n");
-	printf("	Vychozi retezec: %s \n", str);
-	printf("	Hledany retezec: %s \n", strr);
-	printf("	Nalezena pozice: %d \n\n", pozice);
-	printf("------------------------------------- \n\n");
-	printf(">> Test funkce length \n");
-	char *str4 = "x\nz";
-	printf("	Vychozi retezec: %s - retezec x\\nz \n", str4);
-	pozice = length(str4);
-	printf("	Delka: %d \n\n", pozice);
-	printf("------------------------------------- \n\n");
-	printf(">> Test funkce substr \n");
-	char *str5 = "Lorem impsum dolor sit amed";
-	int delka = 5;
-	int pocatek = 4;
-	printf("	Vychozi retezec: %s \n", str5);
-	printf("	Pozadovana delka podretezce: %d \n", delka);
-	printf("	Pozadovana pocatecni pozice: %d \n", pocatek);
-	printf("	Vysledny podretezec: %s \n\n", substr(str5, pocatek, delka));
-	printf("------------------------------------- \n\n");
-	printf(">> Test funkce concat \n");
-	char *str6 = "To je dnes ale ";
-	char *str7 = "krasne!";
-	printf("	Retezec 1: %s \n", str6);
-	printf("	Retezec 2: %s \n", str7);
-	printf("	Konkatenace: %s \n\n", concat(str6, str7));
-	printf("------------------------------------- \n\n");
-	printf(">> Test funkce sort \n");
-	char str8[] = "avcgjmq&'$%4@b^DCdkcorpwc5768/**=z+;;<>-_:?!)/)({}[]AHRTZ";
-	printf("	Vstupni retezec: %s \n", str8);
-	printf("	Serazeny retezec: %s \n\n", sort(str8));
-	printf("------------------------------------- \n\n");
 }

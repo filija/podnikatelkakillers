@@ -94,7 +94,8 @@ int strGetLength(string *s)
 
 void string_from_char(char **ch, string *s){
    if (s->length == 0) {
-      *ch = NULL;
+      *ch = malloc(sizeof(char));
+      (*ch)[0] = 0;
    }
    else {
     	*ch = malloc((sizeof(char))*(s->length +1));

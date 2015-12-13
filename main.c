@@ -26,21 +26,28 @@ int main(int argc, char** argv)
    listInit(&inst_list);
    int result;
    result = parse(&global_table, &inst_list);
-   printf("Result: %i\n", result);
-   if (result) return -result;
+   if (result) {
+      fclose(f);
+      znic_tabulku(global_table);
+      listFree(&inst_list);
+      return -result;
+   }
    result = check_defined(global_table);
-   printf("Result: %i\n", result);
-   if (result) return -result;
-   listFirst(&inst_list);
-   /*while (inst_list.active != NULL){
-      printf("instr number %i %s %s %s\n", inst_list.active->instType, (char*)inst_list.active->addr1, (char*)inst_list.active->addr2, (char*)inst_list.active->addr3);
-      listNext(&inst_list);
-   }*/
+   if (result) {
+      fclose(f);
+      znic_tabulku(global_table);
+      listFree(&inst_list);
+      return -result;
+   }
    result = interpret(inst_list,global_table);
-   printf("Result: %i\n", result);
-   if (result) return -result;
+      if (result) {
+      fclose(f);
+      znic_tabulku(global_table);
+      listFree(&inst_list);
+      return -result;
+   }
    fclose(f);
-   return 0;
+   znic_tabulku(global_table);
+   listFree(&inst_list);
+   return -result;
 }
-
-//PUSH POP MUSI BYT SEZNAM, NE ZASOBIK!!!!

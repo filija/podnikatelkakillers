@@ -15,7 +15,7 @@
 #define I_NEROVNO		10
 #define I_PRIRAZENI		11
 #define I_SKOK			12
-#define I_PODM_SKOK		13	//skok pokud neplati!
+#define I_PODM_SKOK		13	//skok pokud podminka neplati
 #define I_LABEL			14
 #define I_CTENI			15
 #define I_ZAPIS			16
@@ -45,6 +45,7 @@ typedef struct
 
 void listInit(tListOfInstr *L);
 int listInsertLast(tListOfInstr *L, int instType, void *addr1, void *addr2, void *addr3);
+void listFree(tListOfInstr *L);
 void listFirst(tListOfInstr *L);
 void listNext(tListOfInstr *L);
 void *listGetPointerLast(tListOfInstr *L);

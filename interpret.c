@@ -1,22 +1,17 @@
 #include "interpret.h"
 
-int interpret(tListOfInstr inst_list, uk_uzel global_table){
-	char in_buffer[BUFFER_LEN] = "\n";
+int interpret(tListOfInstr inst_list, uk_uzel global_table){	//smycka vykonavajici instrukce
+	char in_buffer[BUFFER_LEN] = "\n";	//promenne pro udrzovani infromaci o vstupu od uzivatele
 	int in_position = 0;
-	tStackPtr lokalni_tabulky = NULL;
-	ZIPtr instr_stack = NULL;
-	FrontaPtr fronta = NULL;
-	tSymbolPtr start = najdi_v_tabulce(global_table, "main");
+	tStackPtr lokalni_tabulky = NULL;	//zasobnik tabulek, ktery resi zanorovani a rekurzi
+	ZIPtr instr_stack = NULL;	//zasobnik navratovych skoku
+	FrontaPtr fronta = NULL;	//Fronta na predavani dat mezi funkcemi
+	tSymbolPtr start = najdi_v_tabulce(global_table, "main");	//Vyhledani funkce main + kontrola jestli jsou spravne nezadane parametry
 	if (start == NULL) return SEM_ERR;
 	if (start->parametry != NULL) return SEM_ERR;
-	/*listFirst(&inst_list);
-	while (inst_list.active != NULL){
-		printf("instr number %i %s %s %s\n", inst_list.active->instType, (char*)inst_list.active->addr1, (char*)inst_list.active->addr2, (char*)inst_list.active->addr3);
-		listNext(&inst_list);
-	}*/
-	listJump(&inst_list, start->label);
-	push_tstack(&lokalni_tabulky, start->tabulka, 1);
-	push_tstack(&lokalni_tabulky, NULL, 0);
+	listJump(&inst_list, start->label);	//nastaveni pocatecni instrukce
+	push_tstack(&lokalni_tabulky, start->tabulka, 1);	//nacteni vstupnich dat mainu
+	push_tstack(&lokalni_tabulky, NULL, 0);	//nastaveni pracovni tabulky main
 	while(lokalni_tabulky != NULL){
 	tInstr* aktualni = inst_list.active;
 	tSymbolPtr tmp1 = NULL;
@@ -254,7 +249,7 @@ int interpret(tListOfInstr inst_list, uk_uzel global_table){
 			case I_SKOK:
 				tmp3 = find_tstack(lokalni_tabulky, aktualni->addr3);
 				listJump(&inst_list, tmp3->label);
-				continue;
+				continue;	//continue z duvodu aby jsme se vyhli preskoceni instrukce na kterou se skace, hlavne kvuli instrukci Label_Load
 			case I_PODM_SKOK:
 				tmp1 = find_tstack(lokalni_tabulky, aktualni->addr1);
 				tmp3 = find_tstack(lokalni_tabulky, aktualni->addr3);
@@ -277,12 +272,13 @@ int interpret(tListOfInstr inst_list, uk_uzel global_table){
 				push_tstack(&lokalni_tabulky, NULL, 0);
 				break;
 			case I_UNLOAD:
+				znic_pracovni_tabulku(lokalni_tabulky->tabulka);
 				pop_tstack(&lokalni_tabulky);	//free na tuto tabulku
 				pop_tstack(&lokalni_tabulky);
 				break;
 			case I_PRIRAZENI:
 				tmp1 = find_tstack(lokalni_tabulky, aktualni->addr1);
-				tmp3 = out_find_tstack(lokalni_tabulky, aktualni->addr3);
+				tmp3 = out_find_tstack(lokalni_tabulky, (char*)aktualni->addr3);
 				if (tmp3->typ == INT_V){
 					if (tmp1->typ == INT_V){
 						tmp3->value.i = tmp1->value.i;
@@ -300,10 +296,13 @@ int interpret(tListOfInstr inst_list, uk_uzel global_table){
 					}
 				}
 				else {
-					tmp3->value.s = tmp1->value.s;
+					if (tmp3->value.s != NULL) free(tmp3->value.s);
+					char* tmpchar = malloc(strlen(tmp1->value.s)+1);
+					strcpy(tmpchar, tmp1->value.s);
+					tmp3->value.s = tmpchar;
 				}
 				break;
-			case I_CTENI://#rup curak, zvlastni stavovy automat, ktery si bude volat cteni pokud je vstup prazdny... to co je napsane je k nicemu
+			case I_CTENI:
 				tmp3 = out_find_tstack(lokalni_tabulky, aktualni->addr3);
 				int result;
 				switch (tmp3->typ){
@@ -345,14 +344,16 @@ int interpret(tListOfInstr inst_list, uk_uzel global_table){
 						break;
 				}
 				break;
-			case I_RETURN:	//vyresit jeste pop na seznam!
+			case I_RETURN:
 				tmp3 = find_tstack(lokalni_tabulky, aktualni->addr3);
 				copy_item(&tmp2, tmp3);
 				pushFronta(&fronta, tmp2);
+				znic_pracovni_tabulku(lokalni_tabulky->tabulka);
 				pop_tstack(&lokalni_tabulky);	//free na tuto tabulku
 				while (lokalni_tabulky->zarazka != 1){
 					pop_tstack(&lokalni_tabulky);
-					pop_tstack(&lokalni_tabulky);
+					znic_pracovni_tabulku(lokalni_tabulky->tabulka);
+					pop_tstack(&lokalni_tabulky);	//i na tuto free
 				}
 				pop_tstack(&lokalni_tabulky);
 				aktualni = popZI(&instr_stack);
@@ -386,9 +387,11 @@ int interpret(tListOfInstr inst_list, uk_uzel global_table){
 					}
 				}
 				else {
+					if (tmp3->value.s != NULL) free(tmp3->value.s);
 					tmp3->value.s = tmp2->value.s;
 				}
 				break;
+				free(tmp2);
 			case I_CALL:
 				tmp3 = najdi_v_tabulce(global_table, aktualni->addr3);
 				push_tstack(&lokalni_tabulky, tmp3->tabulka, 1);
@@ -396,7 +399,7 @@ int interpret(tListOfInstr inst_list, uk_uzel global_table){
 				pushZI(&instr_stack, aktualni);
 				listJump(&inst_list, tmp3->label);
 				break;
-			default:	//label!
+			default:	//label
 				break;
 		}
 		listNext(&inst_list);
@@ -404,7 +407,7 @@ int interpret(tListOfInstr inst_list, uk_uzel global_table){
 	 return IS_OK;
 }
 
-int pushFronta(FrontaPtr* fronta, tSymbolPtr prvek){
+int pushFronta(FrontaPtr* fronta, tSymbolPtr prvek){	//resi vlozeni na frontu pomoci ktere si predavaji data funkce mezi sebou
 	if (*fronta == NULL){
 		*fronta = malloc(sizeof(struct FrontaInter));
 		if (*fronta != NULL){
@@ -428,7 +431,7 @@ int pushFronta(FrontaPtr* fronta, tSymbolPtr prvek){
 	return INTERNAL_ERR;
 }
 
-tSymbolPtr popFronta(FrontaPtr* fronta){
+tSymbolPtr popFronta(FrontaPtr* fronta){	//resi vyjmuti z fronty pomoci ktere si predavaji data funkce mezi sebou
 	if (*fronta == NULL) return NULL;
 	tSymbolPtr result = (*fronta)->symbol;
 	FrontaPtr tmpfronta = *fronta;
@@ -437,7 +440,7 @@ tSymbolPtr popFronta(FrontaPtr* fronta){
 	return result;
 }
 
-int pushZI(ZIPtr* Instr_zas, tInstr* instrukce){
+int pushZI(ZIPtr* Instr_zas, tInstr* instrukce){	//vlozeni na zaobnik skokovych instrukci
 	if (*Instr_zas == NULL){
 		*Instr_zas = malloc(sizeof(struct ZasobnikInstrukci));
 		if (*Instr_zas != NULL){
@@ -456,7 +459,7 @@ int pushZI(ZIPtr* Instr_zas, tInstr* instrukce){
 	return INTERNAL_ERR;
 }
 
-tInstr* popZI(ZIPtr *Instr_zas){
+tInstr* popZI(ZIPtr *Instr_zas){	//vyjmuti ze zasobniku skokovych instrukci
 	if (*Instr_zas == NULL) return NULL;
 	tInstr* result = (*Instr_zas)->instrukce;
 	ZIPtr tmpprvek = *Instr_zas;
@@ -465,7 +468,7 @@ tInstr* popZI(ZIPtr *Instr_zas){
 	return result;
 }
 
-int cin_int(int *vystup, char *vstup, int *pozice){
+int cin_int(int *vystup, char *vstup, int *pozice){	//nacteni int ze vstupu a v pripade zadnych dat, si znovu vola nacteni
 	int stav = 0;
 	int poc_pozice = 0;
 	while (1){
@@ -495,7 +498,7 @@ int cin_int(int *vystup, char *vstup, int *pozice){
 	}
 }
 
-int cin_float(double *vystup, char *vstup, int *pozice){
+int cin_float(double *vystup, char *vstup, int *pozice){ //nacteni float ze vstupu a v pripade zadnych dat, si znovu vola nacteni
 	int stav = 0;
 	int poc_pozice = 0;
 	while (1){
@@ -574,7 +577,7 @@ int cin_float(double *vystup, char *vstup, int *pozice){
 	}
 }
 
-int cin_string(char **vystup, char *vstup, int *pozice){
+int cin_string(char **vystup, char *vstup, int *pozice){ //nacteni float ze vstupu a v pripade zadnych novych dat, vraci prazdny retezec
 	int stav = 0;
 	int poc_pozice = 0;
 	int flag = 0;

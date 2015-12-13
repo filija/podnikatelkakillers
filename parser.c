@@ -7,26 +7,8 @@ tStackPtr table = NULL;
 uk_uzel global_table = NULL;
 string attr;
 tListOfInstr *list; // list instrukci
-int fun_type;
+int fun_type;	//hodnota typu funkce, kvul return
 
-void print_koren_udu(uk_uzel tabulka){	//SMAZAT PRED ODEVZDANIM!!!!
-	if(tabulka == NULL) return;
-	switch (tabulka->data->typ){
-		case INT_V:
-			printf("Jmeno a hodnota(int) je >>> %s %i\n", tabulka->symbol, tabulka->data->value.i);
-			break;
-		case DOUBLE_V:
-			printf("Jmeno a hodnota(flt) je >>> %s %f\n", tabulka->symbol, tabulka->data->value.d);
-			break;
-		case STRING_V:
-			printf("Jmeno a hodnota(str) je >>> %s %s\n", tabulka->symbol, tabulka->data->value.s);
-			break;
-		default:
-			printf("JMENO ???::: %s\n", tabulka->symbol);
-	}
-	print_koren_udu(tabulka->LPtr);
-	print_koren_udu(tabulka->RPtr);
-}
 
 void generateVariable(char **var)	//funkce na generovani unikatniho jmena vnitrnich promennych
 {
@@ -35,7 +17,7 @@ void generateVariable(char **var)	//funkce na generovani unikatniho jmena vnitrn
   sprintf (*var, "$%i", countVar);
   countVar ++;
 }
-//stringy uvnitr kopirovat pro ID, u ostatnich neni relevatni a muze byt string NULL
+
 int pushPrc(int s_token, char* promenna, PrcPtr *list) {	//navratova hodnota funkce je jestli byla vnitrni chyba, nebo ne
 	PrcPtr tmpItem;
 	if ( (tmpItem = malloc(sizeof(struct listPrecedence))) == NULL )return INTERNAL_ERR;
@@ -211,7 +193,7 @@ do{
 					else if (vkladany1->typ == DOUBLE_V && vkladany3->typ == INT_V) type_var = 2;
 					else if (vkladany1->typ == INT_V && vkladany3->typ == DOUBLE_V) type_var = 2;
 					else return STYPE_ERR;
-					generateVariable(&atr2); //v atr2 je zarucene NULL
+					generateVariable(&atr2);
 					inicializuj_data(&vkladany2);
 					vkladany2->typ = type_var;
 					vkladany2->defined = 1;
@@ -388,10 +370,6 @@ do{
 					insert_tstack(table, atr2, vkladany2);
 					listInsertLast(list, I_VETSI, (void*)atr3, (void*)atr1, (void*)atr2);
 					pushPrc(ID, atr2, &PSAlist);
-					break;
-				default:
-					printf("Toto by se nemelo stat. nahlasit!\n");
-					//stdout ze tady by to nikdy dojit nemelo a najit v jakem pripade se to stalo :)
 					break;
 			}
 			break;
@@ -757,20 +735,19 @@ int definice(tSymbolPtr funkce_v){
 	int outcome;
 	switch(token){
 		case LS_ZAVORKA:
-			if (funkce_v->defined == 1) return SEM_ERR;
+			if (funkce_v->defined == 1) return SEM_ERR;	//kontrola dvojte definice
 			funkce_v->defined = 1;
-			fun_type = funkce_v->typ;
+			fun_type = funkce_v->typ;	//globalni nastaveni typu funkce, pro kontrolu u return
 			push_tstack(&table, NULL, 1);
 			listInsertLast(list, I_LABEL, NULL, NULL, (void*)funkce_v->symbol);
 			funkce_v->label = list->last;
-			//funkcni label by mel byt asi jiny nez klasicky, aby vytvoril automaticky novou uroven a natahnul si tabulku -> bude resit CALL!
 			outcome = load_params(funkce_v->parametry);	//vlozeni parametru do lokalni tabulky
 			if (outcome != IS_OK) return outcome;
 			outcome = slozeny();
 			if (outcome != IS_OK) return outcome;
 			funkce_v->tabulka = table->tabulka;	//ulozeni lokalni tabulky
 			pop_tstack(&table);
-			//label/znacka ukonceni funkce (pokud se na nej dojde, tak nastala chyba typu nenalezen return prikaz)
+			//znacka ukonceni funkce (pokud se na nej dojde, tak nastala chyba typu nenalezen return prikaz)
 			listInsertLast(list, I_FUN_ERR, NULL, NULL, NULL);
 			return IS_OK;
 			break;
@@ -896,7 +873,7 @@ int prikaz(){
 			generateVariable(&label3);
 			listInsertLast(list, I_PODM_SKOK, p_ziskany->symbol, NULL, (void*)label3);
 			if (token != STREDNIK) return SYN_ERR;
-			tListOfInstr *keylist = list;
+			tListOfInstr *keylist = list;	//docasne ukladani instrukci, ktere bude vlozeno za telo for, aby se nemuselo skakat
 			tListOfInstr tmplist;
    			listInit(&tmplist);
    			list = &tmplist;
@@ -1088,7 +1065,7 @@ int dvypis(){
 	}
 }
 
-int promenna(int prepinac){	//prepinac resi jestli je povoleno nemit definici promenne
+int promenna(int prepinac){	//prepinac resi jestli je povoleno nemit definici promenne, dulezite pro FOR
 	int outcome;
 	int typ_v;
 	char* nazev = NULL;
@@ -1282,7 +1259,7 @@ int term(char **ziskany){
 	}
 }
 
-int load_params(param *parametry_v){
+int load_params(param *parametry_v){	//funkce ktera resi vygenerovani instrukci po startu funkce
 	tSymbolPtr vkladany;
 	while(parametry_v != NULL){
 		vkladany = NULL;

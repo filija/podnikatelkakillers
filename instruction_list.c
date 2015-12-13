@@ -25,6 +25,18 @@ int listInsertLast(tListOfInstr *L, int instType, void *addr1, void *addr2, void
 	return IS_OK;
 }
 
+void listFree(tListOfInstr *L)
+// funkce dealokuje seznam instrukci
+{
+  tInstr *tmp;
+  while (L->first != NULL)
+  {
+    tmp = L->first;
+    L->first = L->first->next;
+    free(tmp);
+  }
+}
+
 void listFirst(tListOfInstr *L)
 // zaktivuje prvni instrukci
 {
