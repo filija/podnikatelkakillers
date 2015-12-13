@@ -857,7 +857,7 @@ int prikaz(){
 			getToken
 			if (token != L_ZAVORKA) return SYN_ERR;
 			getToken
-			outcome = promenna(1);
+			outcome = promenna(0);
 			if (outcome != IS_OK) return outcome;
 			if (token != STREDNIK) return SYN_ERR;
 			generateVariable(&label2);
